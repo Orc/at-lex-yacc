@@ -3,12 +3,14 @@
 #include "y.tab.h"
 
 #if DEBUG
-#define NEWLINE	putchar('\n');
-#define SAY	ECHO; putchar(' ');
+#define SAY	fprintf(stderr, "%s ", yytext);
 #else
 #define SAY
-#define NEWLINE
 #endif
+
+extern int yy_input_me(char *buf, int size);
+
+#define YY_INPUT(b,r,max)	(r = yy_input_me(b,max))
 %}
 
 %%
@@ -33,6 +35,7 @@ YEARS?		{ SAY return YEAR; }
 FROM		{ SAY return FROM; }
 NOW		{ SAY return NOW; }
 NEXT		{ SAY return NEXT; }
+EXACTLY		{ SAY return EXACTLY; }
 JAN(UARY)?	{ SAY return MONTHNAME; }
 FEB(RUARY)?	{ SAY return MONTHNAME; }
 MAR(CH)?	{ SAY return MONTHNAME; }
@@ -48,5 +51,6 @@ DEC(EMBER)?	{ SAY return MONTHNAME; }
 \-		{ SAY return DASH; }
 \/		{ SAY return SLASH; }
 \+		{ SAY return PLUS; }
-[\n]+		{ NEWLINE return EOL; }
 [ \t\r]+	;
+[a-z][a-z0-9]*	{ SAY return ERROR; }
+.		{ SAY return ERROR; }

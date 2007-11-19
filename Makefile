@@ -10,7 +10,9 @@ clean:
 	rm -f $(OBJS) $(PROGS) lex.yy.c y.tab.c y.tab.h
 
 test: at tests
-	./at < tests
+	while IFS= read line; do \
+	    ./at "$$line"; \
+	done < tests
 
 at: $(OBJS)
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
