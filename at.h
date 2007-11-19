@@ -1,3 +1,11 @@
-enum tokens { NUMBER, DOT, COLON, AM, PM, NOON, MIDNIGHT, TEATIME, TODAY,
-	      TONIGHT, TOMORROW, DAY, WEEK, MONTH, YEAR, FROM, NOW,  NEXT,
-	      MINUTE, HOUR, DASH, SLASH, PLUS, MONTHNAME,  ERROR };
+struct atjobtime {
+    enum { OFFSET, EXACT_OFFSET, DATE } mode;
+    int special;	/* TONIGHT, TOMORROW, TODAY */
+    int minute, hour, day, month, year;
+    int offset;
+    int units;		/* MINUTE HOUR DAY WEEK MONTH YEAR */
+    int plural;		/* <interval>(s) */
+    int pm;		/* am or pm */
+};
+
+#define YYSTYPE int
