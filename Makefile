@@ -1,6 +1,6 @@
 OBJS=lex.yy.o y.tab.o
 LIBES=-ll
-CFLAGS=-O
+CFLAGS=-O -DDEBUG=1
 
 PROGS=at
 
