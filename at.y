@@ -49,7 +49,7 @@ void
 yysetdate(struct atjobtime *at, int day, int month, int year)
 {
     at->day = yyset(at, day, DAY);
-    at->month = yyset(at, month, MONTH);
+    at->month = yyset(at, month, MONTH)-1;
     at->year = year;
 }
 
@@ -109,7 +109,7 @@ yy_prepare(struct atjobtime *at, int argc, char **argv)
     
     bzero(at, sizeof *at);
     at->mode = DATE;
-    at->pm = -1;
+    at->year = at->month = at->day = at->pm = -1;
     
     yy_at = at;
     
@@ -159,12 +159,13 @@ dump(atjobtime *a)
 	    fprintf(stderr, " tomorrow");
 	    break;
 	case SOONEST:
+	    fprintf(stderr, " soonest");
 	    break;
 	default:
-	    fprintf(stderr, " %d.%d", a->day,a->month);
+	    fprintf(stderr, " %d.%d", a->day, a->month + 1);
 	break;
 	}
-	if (a->year)
+	if (a->year > 0)
 	    fprintf(stderr, ".%d", a->year);
 	fputc('>',stderr);
     }
@@ -181,25 +182,6 @@ dump(atjobtime *a)
     fputc('\n', stderr);
 }
 
-
-main(argc, argv)
-char **argv;
-{
-    struct atjobtime at;
-    int i;
-
-    if ( argc <= 1 )
-	exit(1);
-	
-    if ( yy_prepare(&at, argc-1, argv+1) > 0 ) {
-	yyparse();
-	/* dump(&at); */
-	exit(0);
-    }
-    perror("yy_prepare");
-    exit(1);
-}
-
 %}
 
 %token NUMBER DOT COLON AM PM NOON MIDNIGHT TEATIME TODAY TONIGHT 
@@ -209,15 +191,11 @@ char **argv;
 %%
 
 when:	EXACTLY date_offset FROM NOW
-	{   struct tm *t; time_t ttt;
-	    time(&ttt);
-	    t = gmtime(&ttt);
-	    yy_at->hour = t->tm_hour;
-	    yy_at->minute = t->tm_min;
-	    yy_at->mode = EXACT_OFFSET; }
+	{ yy_at->mode = EXACT_OFFSET; }
     |	delay_time
-	{ yy_at->mode = OFFSET; }
+	{ yy_at->mode = EXACT_OFFSET; }
     |	time date
+	{ yy_at->mode = OFFSET; }
     ;
 
 next_interval:	NEXT day_interval
@@ -269,9 +247,9 @@ time:	NUMBER ampm
     |	NOON
 	{ yy_at->hour = 12; yy_at->minute = 0; }
     |	MIDNIGHT
-	{ yy_at->hour = 0; yy_at->minute = 0; }
+	{ yy_at->hour = 23; yy_at->minute = 60; }
     |	TEATIME
-	{ yy_at->hour = 4; yy_at->minute = 0; yy_at->pm = 1; }
+	{ yy_at->hour = 14; yy_at->minute = 0; }
     ;
     
 ampm:	AM

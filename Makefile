@@ -1,4 +1,4 @@
-OBJS=lex.yy.o y.tab.o
+OBJS=lex.yy.o y.tab.o main.o
 LIBES=-ll
 CFLAGS=-O -g
 
@@ -13,7 +13,7 @@ test: at tests
 	@grep -v '^#' tests | while IFS= read line; do \
 	    if [ ! -z "$$line" ]; then \
 		printf '%-35s ... ' "$$line"  ; \
-		./at $$line && echo "ok" ; \
+		DEBUG_AT=1 ./at $$line && echo "ok" ; \
 	    fi; \
 	done 1>&2; exit 0
 
@@ -26,4 +26,4 @@ lex.yy.c: at.l
 at.l: y.tab.h
 
 y.tab.h y.tab.c: at.y
-	$(YACC) -v -d at.y
+	$(YACC) -d at.y
