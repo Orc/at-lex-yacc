@@ -41,6 +41,13 @@ FROM		{ SAY return FROM; }
 NOW		{ SAY return NOW; }
 NEXT		{ SAY return NEXT; }
 EXACTLY		{ SAY return EXACTLY; }
+SUN(DAY)?	{ SAY yylval= 0; return DAYNAME; }
+MON(DAY)?	{ SAY yylval= 1; return DAYNAME; }
+TUE(SDAY)?	{ SAY yylval= 2; return DAYNAME; }
+WED(NESDAY)?	{ SAY yylval= 3; return DAYNAME; }
+THU(RSDAY)?	{ SAY yylval= 4; return DAYNAME; }
+FRI(DAY)?	{ SAY yylval= 5; return DAYNAME; }
+SAT(URDAY)?	{ SAY yylval= 6; return DAYNAME; }
 JAN(UARY)?	{ SAY yylval= 1; return MONTHNAME; }
 FEB(RUARY)?	{ SAY yylval= 2; return MONTHNAME; }
 MAR(CH)?	{ SAY yylval= 3; return MONTHNAME; }

@@ -119,15 +119,12 @@ yy_prepare(struct atjobtime *at, int argc, char **argv)
 	yy_size += strlen(argv[i]);
     }
 
-    if ( yy_size < 1 ) {
-	fprintf(stderr, "<argc=%d>", argc);
+    if ( yy_size < 1 )
 	return 0;
-    }
 
-    if ( (yy_source = malloc(yy_size)) == 0 ) {
-	fprintf(stderr, "<argc=%d,yy_size=%d>", argc, yy_size);
+    if ( (yy_source = malloc(yy_size)) == 0 )
 	return 0;
-    }
+
     yy_index = 0;
     yy_source[0] = 0;
 
@@ -185,31 +182,49 @@ dump(atjobtime *a)
 %}
 
 %token NUMBER DOT COLON AM PM NOON MIDNIGHT TEATIME TODAY TONIGHT 
-%token TOMORROW DAY WEEK MONTH YEAR FROM NOW  NEXT MINUTE HOUR DASH
-%token SLASH PLUS MONTHNAME EXACTLY ERROR SOONEST
+%token TOMORROW DAY WEEK MONTH YEAR FROM NOW NEXT MINUTE HOUR DASH
+%token SLASH PLUS MONTHNAME EXACTLY SOONEST DAYNAME
+%token ERROR
 
 %%
 
 when:	EXACTLY date_offset FROM NOW
 	{ yy_at->mode = EXACT_OFFSET; }
     |	delay_time
-	{ yy_at->mode = EXACT_OFFSET; }
+    |	delay_days
     |	time date
-	{ yy_at->mode = OFFSET; }
+	{ yy_at->mode = DATE; }
+    |   time delay_days
+    |	time next_interval
+	{ yy_at->mode = DATE; }
     ;
 
-next_interval:	NEXT day_interval
-		{ yyunits(yy_at, 1); }
+next_interval:	NEXT next_offset
+		{ yy_at->mode = DATE; }
+	;
+
+next_offset:	WEEK
+		{ yy_at->special = WEEK; }
+	|	MONTH
+		{ yy_at->special = MONTH; }
+	|	YEAR
+		{ yy_at->special = YEAR; }
+	|	DAYNAME
+		{ yy_at->special = DAYNAME; yy_at->offset = yylval; }
 	;
 
 delay_time:	PLUS time_offset
+		{ yy_at->mode = EXACT_OFFSET; }
 	|	time_offset FROM NOW
+		{ yy_at->mode = EXACT_OFFSET; }
 	|	next_interval
+		{ yy_at->mode = DATE; }
 	;
 
 delay_days:	PLUS date_offset
+		{ yy_at->mode = OFFSET; }
 	|	date_offset FROM NOW
-	|	next_interval
+		{ yy_at->mode = OFFSET; }
 	;
 	
 
@@ -225,7 +240,6 @@ interval:	MINUTE
 		{ yy_at->units = MINUTE; yy_at->plural = $1; }
 	|	HOUR
 		{ yy_at->units = HOUR; yy_at->plural = $1; }
-	|	day_interval
 	;
 
 day_interval:	DAY
@@ -249,7 +263,7 @@ time:	NUMBER ampm
     |	MIDNIGHT
 	{ yy_at->hour = 23; yy_at->minute = 60; }
     |	TEATIME
-	{ yy_at->hour = 14; yy_at->minute = 0; }
+	{ yy_at->hour = 16; yy_at->minute = 0; }
     ;
     
 ampm:	AM
@@ -259,7 +273,6 @@ ampm:	AM
     ;
 
 optional_ampm:	/* doesn't need to be here */
-		{ yy_at->pm = 0; }
 	    |	ampm
 	    ;
 
@@ -271,8 +284,6 @@ date:	/* doesn't need to be here */
 	{ yy_at->special = TONIGHT; }
     |	TOMORROW
 	{ yy_at->special = TOMORROW; }
-    |   delay_days
-	{ yy_at->mode = EXACT_OFFSET; }
     |	slashed_date
     |	dotted_date
     |	dashed_date
