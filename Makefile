@@ -10,9 +10,9 @@ clean:
 	rm -f $(OBJS) $(PROGS) lex.yy.c y.tab.c y.tab.h
 
 test: at tests
-	while IFS= read line; do \
-	    ./at "$$line"; \
-	done < tests
+	grep -v '^#' tests | while IFS= read line; do \
+	    ./at $$line; \
+	done
 
 at: $(OBJS)
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
@@ -23,4 +23,4 @@ lex.yy.c: at.l
 at.l: y.tab.h
 
 y.tab.h y.tab.c: at.y
-	$(YACC) -d at.y
+	$(YACC) -v -d at.y

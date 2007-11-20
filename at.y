@@ -5,9 +5,6 @@
 #include "y.tab.h"
 #include "at.h"
 
-struct atjobtime at;
-
-
 void
 yyerror(const char *why)
 {
@@ -81,9 +78,10 @@ yywrap()
     return 1;
 }
 
-static char *yy_source;
-static int   yy_size;
-static int   yy_index;
+static atjobtime *yy_at;
+static char      *yy_source;
+static int        yy_size;
+static int        yy_index;
 
 int
 yy_input_me(char *bfr, int wanted)
@@ -103,35 +101,106 @@ yy_input_me(char *bfr, int wanted)
 }
 
 
-main(argc, argv)
-char **argv;
+int
+yy_prepare(struct atjobtime *at, int argc, char **argv)
 {
     int i;
-
-    for (yy_size=0,i=1; i < argc; i++) {
-	if (i > 1)
+    
+    bzero(at, sizeof *at);
+    at->mode = DATE;
+    at->pm = -1;
+    
+    yy_at = at;
+    
+    for (yy_size=0,i=0; i < argc; i++) {
+	if (i)
 	    yy_size++;
 	yy_size += strlen(argv[i]);
     }
 
-    yy_source = alloca(yy_size);
+    if ( yy_size < 1 ) {
+	fprintf(stderr, "<argc=%d>", argc);
+	return 0;
+    }
+
+    if ( (yy_source = malloc(yy_size)) == 0 ) {
+	fprintf(stderr, "<argc=%d,yy_size=%d>", argc, yy_size);
+	return 0;
+    }
     yy_index = 0;
     yy_source[0] = 0;
 
-    for (i=1; i < argc; i++) {
-	if (i > 1)
+    for (i=0; i < argc; i++) {
+	if (i)
 	    strcat(yy_source, " ");
 	strcat(yy_source, argv[i]);
     }
 
-    bzero(&at, sizeof at);
-    at.mode = DATE;
-    at.pm = -1;
-    if (yy_size > 0) {
-	yyparse();
-	fputc('\n', stderr);
-    }
+    return yy_size;
 }
+
+
+void
+dump(atjobtime *a)
+{
+    if (a->mode == DATE) {
+	fprintf(stderr, "<%d:%02d", a->hour, a->minute);
+	if (a->pm >= 0)
+	    fprintf(stderr," %s", a->pm ? "pm" : "am");
+	switch (a->special) {
+	case TODAY:
+	    fprintf(stderr, " today");
+	    break;
+	case TONIGHT:
+	    fprintf(stderr, " tonight");
+	    break;
+	case TOMORROW:
+	    fprintf(stderr, " tomorrow");
+	    break;
+	case SOONEST:
+	    break;
+	default:
+	    fprintf(stderr, " %d.%d", a->day,a->month);
+	break;
+	}
+	if (a->year)
+	    fprintf(stderr, ".%d", a->year);
+	fputc('>',stderr);
+    }
+    else {
+	fputc('<',stderr);
+	if (a->mode == EXACT_OFFSET)
+	    fprintf(stderr,"%d:%02d %s, ",
+		    a->hour,a->minute,
+		    a->pm ? "pm":"am");
+	fprintf(stderr, "offset=%d,units=%d%s>",
+		a->offset,a->units,
+		(a->mode==OFFSET)?"":",EXACT");
+    }
+    fputc('\n', stderr);
+}
+
+
+main(argc, argv)
+char **argv;
+{
+    struct atjobtime at;
+    int i;
+
+    if (argc <= 1) {
+	fprintf(stderr, "usage: at [when-spec] << job\n");
+	exit(1);
+    }
+	
+    if ( yy_prepare(&at, argc-1, argv+1) > 0 ) {
+	yyparse();
+	dump(&at);
+    }
+    else
+	perror("yy_prepare");
+    exit(0);
+}
+
 %}
 
 %token NUMBER DOT COLON AM PM NOON MIDNIGHT TEATIME TODAY TONIGHT 
@@ -140,58 +209,20 @@ char **argv;
 
 %%
 
-job:	when
-	{	if (at.mode == DATE) {
-		    fprintf(stderr, "<%d:%02d", at.hour, at.minute);
-		    if (at.pm >= 0)
-			fprintf(stderr," %s", at.pm ? "pm" : "am");
-		    switch (at.special) {
-		    case TODAY:
-			    fprintf(stderr, " today");
-			    break;
-		    case TONIGHT:
-			    fprintf(stderr, " tonight");
-			    break;
-		    case TOMORROW:
-			    fprintf(stderr, " tomorrow");
-			    break;
-		    case SOONEST:
-			    break;
-		    default:
-			    fprintf(stderr, " %d.%d", at.day,at.month);
-			    break;
-		    }
-		    if (at.year)
-			fprintf(stderr, ".%d", at.year);
-		    fputc('>',stderr);
-		}
-		else {
-		    fputc('<',stderr);
-		    if (at.mode == EXACT_OFFSET)
-			fprintf(stderr,"%d:%02d %s, ",
-				    at.hour,at.minute, at.pm ? "pm":"am");
-		    fprintf(stderr, "offset=%d,units=%d%s>",
-			    at.offset,at.units,
-			    (at.mode==OFFSET)?"":",EXACT");
-		}
-		fflush(stderr);
-	}
-    ;
-
-when:	EXACTLY date_offset
+when:	EXACTLY date_offset FROM NOW
 	{   struct tm *t; time_t ttt;
 	    time(&ttt);
 	    t = gmtime(&ttt);
-	    at.hour = t->tm_hour;
-	    at.minute = t->tm_min;
-	    at.mode = EXACT_OFFSET; }
+	    yy_at->hour = t->tm_hour;
+	    yy_at->minute = t->tm_min;
+	    yy_at->mode = EXACT_OFFSET; }
     |	delay_time
-	{ at.mode = OFFSET; }
+	{ yy_at->mode = OFFSET; }
     |	time date
     ;
 
 next_interval:	NEXT day_interval
-		{ yyunits(&at, 1); }
+		{ yyunits(yy_at, 1); }
 	;
 
 delay_time:	PLUS time_offset
@@ -205,66 +236,66 @@ delay_days:	PLUS date_offset
 	;
 	
 
-date_offset:	NUMBER day_interval FROM NOW
-		{ yyunits(&at, $1); }
+date_offset:	NUMBER day_interval
+		{ yyunits(yy_at, $1); }
 	    ;
 
 time_offset:	NUMBER interval
-		{ yyunits(&at, $1); }
+		{ yyunits(yy_at, $1); }
 		;
 
 interval:	MINUTE
-		{ at.units = MINUTE; at.plural = $1; }
+		{ yy_at->units = MINUTE; yy_at->plural = $1; }
 	|	HOUR
-		{ at.units = HOUR; at.plural = $1; }
+		{ yy_at->units = HOUR; yy_at->plural = $1; }
 	|	day_interval
 	;
 
 day_interval:	DAY
-		{ at.units = DAY; at.plural = $1; }
+		{ yy_at->units = DAY; yy_at->plural = $1; }
 	    |	WEEK
-		{ at.units = WEEK; at.plural = $1; }
+		{ yy_at->units = WEEK; yy_at->plural = $1; }
 	    |	MONTH
-		{ at.units = MONTH; at.plural = $1; }
+		{ yy_at->units = MONTH; yy_at->plural = $1; }
 	    |	YEAR
-		{ at.units = YEAR; at.plural = $1; }
+		{ yy_at->units = YEAR; yy_at->plural = $1; }
 	    ;
 
 time:	NUMBER ampm
-	{   at.minute = 0;
-	    at.hour = yyset(&at, $1, HOUR); }
+	{   yy_at->minute = 0;
+	    yy_at->hour = yyset(yy_at, $1, HOUR); }
     |	NUMBER COLON NUMBER optional_ampm
-	{   at.minute = yyset(&at, $3, MINUTE);
-	    at.hour = yyset(&at, $1, HOUR); }
+	{   yy_at->minute = yyset(yy_at, $3, MINUTE);
+	    yy_at->hour = yyset(yy_at, $1, HOUR); }
     |	NOON
-	{ at.hour = 12; at.minute = 0; }
+	{ yy_at->hour = 12; yy_at->minute = 0; }
     |	MIDNIGHT
-	{ at.hour = 0; at.minute = 0; }
+	{ yy_at->hour = 0; yy_at->minute = 0; }
     |	TEATIME
-	{ at.hour = 4; at.minute = 0; at.pm = 1; }
+	{ yy_at->hour = 4; yy_at->minute = 0; yy_at->pm = 1; }
     ;
     
 ampm:	AM
-	{ at.pm = 0; }
+	{ yy_at->pm = 0; }
     |	PM
-	{ at.pm = 1; }
+	{ yy_at->pm = 1; }
     ;
 
 optional_ampm:	/* doesn't need to be here */
-		{ at.pm = 0; }
+		{ yy_at->pm = 0; }
 	    |	ampm
 	    ;
 
 date:	/* doesn't need to be here */
-	{ at.special = SOONEST; }
+	{ yy_at->special = SOONEST; }
     |	TODAY
-	{ at.special = TODAY; }
+	{ yy_at->special = TODAY; }
     |	TONIGHT
-	{ at.special = TONIGHT; }
+	{ yy_at->special = TONIGHT; }
     |	TOMORROW
-	{ at.special = TOMORROW; }
-    |   delay_time
-	{ at.mode = EXACT_OFFSET; }
+	{ yy_at->special = TOMORROW; }
+    |   delay_days
+	{ yy_at->mode = EXACT_OFFSET; }
     |	slashed_date
     |	dotted_date
     |	dashed_date
@@ -272,11 +303,11 @@ date:	/* doesn't need to be here */
     ;
 
 slashed_date:	NUMBER SLASH NUMBER SLASH NUMBER
-		{ yysetdate(&at, $3, $1, $5); }
+		{ yysetdate(yy_at, $3, $1, $5); }
 	    ;
 
 dotted_date:	NUMBER DOT NUMBER DOT NUMBER
-		{ yysetdate(&at, $1, $3, $5); }
+		{ yysetdate(yy_at, $1, $3, $5); }
 	    ;
 
 dashed_date:	date_with_dashes
@@ -284,19 +315,20 @@ dashed_date:	date_with_dashes
 	    ;
 
 month_date:	MONTHNAME NUMBER
-		{ yysetdate(&at, $2, $1, -1); }
+		{ yysetdate(yy_at, $2, $1, -1); }
 	    |	MONTHNAME NUMBER NUMBER
-		{ yysetdate(&at, $2, $1, $3); }
+		{ yysetdate(yy_at, $2, $1, $3); }
 	    ;
 
 date_with_dashes:	NUMBER DASH MONTHNAME
-			{ yysetdate(&at, $1, $3, -1); }
+			{ yysetdate(yy_at, $1, $3, -1); }
 		|	NUMBER DASH MONTHNAME DASH NUMBER
-			{ yysetdate(&at, $1, $3, $5); }
+			{ yysetdate(yy_at, $1, $3, $5); }
 		;
 
 date_without_dashes:	NUMBER MONTHNAME
-			{ yysetdate(&at, $1, $2, -1); }
+			{ yysetdate(yy_at, $1, $2, -1); }
 		    |	NUMBER MONTHNAME NUMBER
-			{ yysetdate(&at, $1, $2, $3); }
+			{ yysetdate(yy_at, $1, $2, $3); }
 		    ;
+

@@ -1,4 +1,4 @@
-struct atjobtime {
+typedef struct atjobtime {
     enum { OFFSET, EXACT_OFFSET, DATE } mode;
     int special;	/* TONIGHT, TOMORROW, TODAY */
     int minute, hour, day, month, year;
@@ -6,6 +6,6 @@ struct atjobtime {
     int units;		/* MINUTE HOUR DAY WEEK MONTH YEAR */
     int plural;		/* <interval>(s) */
     int pm;		/* am or pm */
-};
+} atjobtime;
 
 #define YYSTYPE int

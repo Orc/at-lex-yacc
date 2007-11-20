@@ -1,33 +1,30 @@
+# good tests
+
 teatime 5 weeks from now
-
 30 minutes from now
-
 5:30pm
-
 3am tomorrow
-
 midnight tonight
 noon today
-
 next month
-
 4am next week
 11:30 
-
 +4 days
-
 teatime 12-Feb-2008
-
 teatime 12 feb 2008
-
 noon 7/31/2009
-
 4pm + 3 days
-
 teatime july 31
-
 teatime july 31 2011
-
 exactly 5 weeks from now
 
+# errors
+
 exactly 30 seconds from now
+13:20am
+27:00
+teatime july 91
+noon 18/31/2009
++4 day
+teatime 1 days from now
+exactly exactly 32 days from now
