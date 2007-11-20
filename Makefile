@@ -1,6 +1,6 @@
 OBJS=lex.yy.o y.tab.o
 LIBES=-ll
-CFLAGS=-O -DDEBUG=1 -g
+CFLAGS=-O -g
 
 PROGS=at
 
@@ -10,15 +10,18 @@ clean:
 	rm -f $(OBJS) $(PROGS) lex.yy.c y.tab.c y.tab.h
 
 test: at tests
-	grep -v '^#' tests | while IFS= read line; do \
-	    ./at $$line; \
-	done
+	@grep -v '^#' tests | while IFS= read line; do \
+	    if [ ! -z "$$line" ]; then \
+		printf '%-35s ... ' "$$line"  ; \
+		./at $$line && echo "ok" ; \
+	    fi; \
+	done 1>&2; exit 0
 
 at: $(OBJS)
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
 
 lex.yy.c: at.l
-	$(LEX) -s -i at.l
+	$(LEX) -i at.l
 
 at.l: y.tab.h
 

@@ -5,10 +5,14 @@
 #include "y.tab.h"
 #include "at.h"
 
+static char      *yy_source = 0;
+static int        yy_size = 0;
+static int        yy_index = 0;
+
 void
 yyerror(const char *why)
 {
-    fprintf(stderr, "<< %s\n", why);
+    fprintf(stderr, "%s\n", why);
     exit(1);
 }
 
@@ -79,9 +83,6 @@ yywrap()
 }
 
 static atjobtime *yy_at;
-static char      *yy_source;
-static int        yy_size;
-static int        yy_index;
 
 int
 yy_input_me(char *bfr, int wanted)
@@ -187,18 +188,16 @@ char **argv;
     struct atjobtime at;
     int i;
 
-    if (argc <= 1) {
-	fprintf(stderr, "usage: at [when-spec] << job\n");
+    if ( argc <= 1 )
 	exit(1);
-    }
 	
     if ( yy_prepare(&at, argc-1, argv+1) > 0 ) {
 	yyparse();
-	dump(&at);
+	/* dump(&at); */
+	exit(0);
     }
-    else
-	perror("yy_prepare");
-    exit(0);
+    perror("yy_prepare");
+    exit(1);
 }
 
 %}
