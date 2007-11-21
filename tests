@@ -5,7 +5,6 @@ teatime 5 weeks from now
 5:30pm
 3am tomorrow
 midnight tonight
-noon today
 next month
 4am next week
 11:30 
@@ -22,8 +21,12 @@ next week
 next monday
 next tuesday
 next wednesday
+
 teatime next monday
 teatime next friday
+
+teatime monday
+teatime friday
 
 # errors
 
@@ -35,3 +38,7 @@ noon 18/31/2009
 +4 day
 teatime 1 days from now
 exactly exactly 32 days from now
+
+# possibly errors
+
+noon today

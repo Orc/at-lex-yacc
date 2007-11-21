@@ -201,7 +201,9 @@ when:	EXACTLY date_offset FROM NOW
 
 next_interval:	NEXT next_offset
 		{ yy_at->mode = DATE; }
-	;
+	    |	DAYNAME
+		{ yy_at->special = DAYNAME; yy_at->offset = yylval; }
+	    ;
 
 next_offset:	WEEK
 		{ yy_at->special = WEEK; }
