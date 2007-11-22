@@ -24,7 +24,7 @@ plural(char *s)
     return (len > 0) && (s[len-1] == 's');
 }
 
-int
+void
 yyunits(struct atjobtime *at, int offset)
 {
     if ( at->plural ) {
@@ -42,14 +42,6 @@ static int
 ok(int min, int value, int max)
 {
     return (value >= min) && (value <= max);
-}
-
-void
-yysetdate(struct atjobtime *at, int day, int month, int year)
-{
-    at->day = yyset(at, day, DAY);
-    at->month = yyset(at, month, MONTH)-1;
-    at->year = year;
 }
 
 
@@ -74,6 +66,16 @@ yyset(struct atjobtime *at, int value, int unit)
 
     return value;
 }
+
+
+void
+yysetdate(struct atjobtime *at, int day, int month, int year)
+{
+    at->day = yyset(at, day, DAY);
+    at->month = yyset(at, month, MONTH)-1;
+    at->year = year;
+}
+
 
 int
 yywrap()
@@ -102,7 +104,7 @@ yy_input_me(char *bfr, int wanted)
 
 
 int
-yy_prepare(struct atjobtime *at, int argc, char **argv)
+yy_prepare(atjobtime *at, int argc, char **argv)
 {
     int i;
     
@@ -134,48 +136,6 @@ yy_prepare(struct atjobtime *at, int argc, char **argv)
     }
 
     return yy_size;
-}
-
-
-void
-dump(atjobtime *a)
-{
-    if (a->mode == DATE) {
-	fprintf(stderr, "<%d:%02d", a->hour, a->minute);
-	if (a->pm >= 0)
-	    fprintf(stderr," %s", a->pm ? "pm" : "am");
-	switch (a->special) {
-	case TODAY:
-	    fprintf(stderr, " today");
-	    break;
-	case TONIGHT:
-	    fprintf(stderr, " tonight");
-	    break;
-	case TOMORROW:
-	    fprintf(stderr, " tomorrow");
-	    break;
-	case SOONEST:
-	    fprintf(stderr, " soonest");
-	    break;
-	default:
-	    fprintf(stderr, " %d.%d", a->day, a->month + 1);
-	break;
-	}
-	if (a->year > 0)
-	    fprintf(stderr, ".%d", a->year);
-	fputc('>',stderr);
-    }
-    else {
-	fputc('<',stderr);
-	if (a->mode == EXACT_OFFSET)
-	    fprintf(stderr,"%d:%02d %s, ",
-		    a->hour,a->minute,
-		    a->pm ? "pm":"am");
-	fprintf(stderr, "offset=%d,units=%d%s>",
-		a->offset,a->units,
-		(a->mode==OFFSET)?"":",EXACT");
-    }
-    fputc('\n', stderr);
 }
 
 %}

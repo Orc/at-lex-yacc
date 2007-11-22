@@ -18,6 +18,8 @@ extern int plural(char *s);
 #define YY_INPUT(b,r,max)	(r = yy_input_me(b,max))
 %}
 
+%option nounput
+
 %%
 
 [0-9]+		{ SAY yylval = atoi(yytext); return NUMBER; }

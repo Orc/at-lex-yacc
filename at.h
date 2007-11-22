@@ -1,3 +1,6 @@
+#ifndef _AT_H
+#define _AT_H 1
+
 typedef struct atjobtime {
     enum { OFFSET, EXACT_OFFSET, DATE } mode;
     int special;	/* TONIGHT, TOMORROW, TODAY */
@@ -9,3 +12,12 @@ typedef struct atjobtime {
 } atjobtime;
 
 #define YYSTYPE int
+
+#define ATDIR	"/var/spool/cron/atjobs"
+
+extern void abend(char *, ...);
+extern int yyparse();
+extern int yy_prepare(atjobtime *,int,char **);
+extern int yylex();
+
+#endif/*_AT_H*/
