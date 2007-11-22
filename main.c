@@ -185,8 +185,9 @@ savejob(time_t when)
     unsigned short seq = 0;
     FILE *output;
     char *pwd;
+    uid_t uid = getuid();
+    gid_t gid = getgid();
     int size;
-
 
     if ( (pwd = malloc(size=1024)) == 0 )
 	abend("%s", strerror(errno));
@@ -213,9 +214,11 @@ savejob(time_t when)
 	else if ( ++seq == 0 )
 	    abend("spool is full -- can't save job");
     }
-
-    if ( (output = fdopen(fd, "w")) == 0 )
+    if ( (fchown(fd, getuid(), getgid()) == -1) || 
+					((output = fdopen(fd, "w")) == 0) ) {
+	unlink(job);
 	abend("spool: %s", strerror(errno));
+    }
     
     /* 
      * write out the environment
@@ -257,14 +260,17 @@ savejob(time_t when)
 
     fprintf(output, "cd %s || exit 1\n", pwd);
 
+    size = 0;
     while ( (c = getchar()) != EOF )
 	if ( fputc(c, output) == EOF ) {
 	    fclose(output);
 	    unlink(job);
 	    abend("write error");
 	}
+	else size ++;
     fclose(output);
-    fchown(fd, geteuid(), getegid());
+    if (size == 0)
+	unlink(job);
     exit(0);
 }
 
