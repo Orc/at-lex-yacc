@@ -1,44 +1,44 @@
 # good tests
 
-teatime 5 weeks from now
-30 minutes from now
-5:30pm
-3am tomorrow
-midnight tonight
-next month
-4am next week
-11:30 
-+4 days
-teatime 12-Feb-2008
-teatime 12 feb 2008
-noon 7/31/2009
-4pm + 3 days
-teatime july 31
-teatime july 31 2011
-exactly 5 weeks from now
+y:teatime 5 weeks from now
+y:30 minutes from now
+y:5:30pm
+y:3am tomorrow
+y:midnight tonight
+y:next month
+y:4am next week
+y:11:30 
+y:+4 days
+y:teatime 12-Feb-2008
+y:teatime 12 feb 2008
+y:noon 7/31/2009
+y:4pm + 3 days
+y:teatime july 31
+y:teatime july 31 2011
+y:exactly 5 weeks from now
 
-next week
-next monday
-next tuesday
-next wednesday
+y:next week
+y:next monday
+y:next tuesday
+y:next wednesday
 
-teatime next monday
-teatime next friday
+y:teatime next monday
+y:teatime next friday
 
-teatime monday
-teatime friday
+y:teatime monday
+y:teatime friday
 
 # errors
 
-exactly 30 seconds from now
-13:20am
-27:00
-teatime july 91
-noon 18/31/2009
-+4 day
-teatime 1 days from now
-exactly exactly 32 days from now
+n:exactly 30 seconds from now
+n:13:20am
+n:27:00
+n:teatime july 91
+n:noon 18/31/2009
+n:+4 day
+n:teatime 1 days from now
+n:exactly exactly 32 days from now
 
 # possibly errors
 
-noon today
+?:noon today

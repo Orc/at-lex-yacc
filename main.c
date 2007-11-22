@@ -1,9 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <stdarg.h>
 #include <time.h>
 
 #include "at.h"
 #include "y.tab.h"
+
+
+int notify = 0;
+int debug = 0;
+
+char *pgm;
+
+abend(char *fmt, ...)
+{
+    va_list ptr;
+
+    if ( fmt ) {
+	va_start(ptr, fmt);
+	fprintf(stderr, "%s: ", pgm);
+	vfprintf(stderr, fmt, ptr);
+	fputc('\n', stderr);
+	va_end(ptr);
+    }
+    else
+	fprintf(stderr, "usage: %s [-m] [-f file] when << job\n", pgm);
+    exit(1);
+}
 
 
 static void
@@ -94,8 +119,9 @@ maketime(atjobtime *at)
     madetime = mktime(t);
 
     if (madetime < now) {
-	fprintf(stderr, "trying to travel back in time\n");
-	dump(at);
+	abend("cannot travel back in time\n");
+	if ( debug & 0x01 )
+	    dump(at);
 	exit(1);
     }
     return madetime;
@@ -107,21 +133,47 @@ char **argv;
 {
     atjobtime at;
     time_t jobtime;
-    int i;
+    int i, opt;
+    int redirect = 0;
 
-    if ( argc <= 1 )
-	exit(1);
-       
-    if ( yy_prepare(&at, argc-1, argv+1) > 0 ) {
-	yyparse();
-
-	jobtime = maketime(&at);
-
-	if (getenv("DEBUG_AT") == 0) {
-	   fputs(ctime(&jobtime), stdout);
+    pgm = basename(argv[0]);
+    opterr = 1;
+    
+    while ( (opt = getopt(argc,argv, "d:f:m")) != EOF )
+	switch (opt) {
+	case 'd':
+		debug = atoi(optarg);
+		break;
+	case 'm':
+		notify = 1;
+		break;
+	case 'f':
+		if ( redirect ) {
+		    abend("too many -f options");
+		    exit(1);
+		}
+		if ( freopen(optarg, "r", stdin) == 0 )
+		    abend("%s", strerror(errno));
+	default:
+	    abend(0);
 	}
+
+    argc -= optind;
+    argv += optind;
+
+    if ( argc < 1 )
+	abend(0);
+       
+    if ( yy_prepare(&at, argc, argv) <= 0 )
+	abend("%s", strerror(errno));
+    
+    yyparse();	/* dies if it can't successfully parse the time */
+
+    jobtime = maketime(&at);
+
+    if ( debug & 0x01 )
+	fprintf(stderr, "job time = %s", ctime(&jobtime));
+    if ( debug & 0x02 )
 	exit(0);
-    }
-    perror("yy_prepare");
-    exit(1);
+    exit(0);
 }

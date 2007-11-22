@@ -12,8 +12,7 @@ static int        yy_index = 0;
 void
 yyerror(const char *why)
 {
-    fprintf(stderr, "%s\n", why);
-    exit(1);
+    abend("%s", why);
 }
 
 

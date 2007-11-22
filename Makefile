@@ -9,13 +9,8 @@ all: $(PROGS)
 clean:
 	rm -f $(OBJS) $(PROGS) lex.yy.c y.tab.c y.tab.h
 
-test: at tests
-	@grep -v '^#' tests | while IFS= read line; do \
-	    if [ ! -z "$$line" ]; then \
-		printf '%-35s ... ' "$$line"  ; \
-		DEBUG_AT=1 ./at $$line && echo "ok" || true ; \
-	    fi; \
-	done 1>&2; exit 0
+test: at tests runtests
+	@sh ./runtests < tests
 
 at: $(OBJS)
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
