@@ -65,5 +65,6 @@ DEC(EMBER)?	{ SAY yylval=12; return MONTHNAME; }
 \-		{ SAY return DASH; }
 \/		{ SAY return SLASH; }
 \+		{ SAY return PLUS; }
+\,		{ SAY return COMMA; }
 [ \t\r]+	;
 [a-z][a-z0-9]*	{ SAY return ERROR; }

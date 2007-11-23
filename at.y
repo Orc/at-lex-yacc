@@ -16,26 +16,12 @@ yyerror(const char *why)
 }
 
 
-int
-plural(char *s)
-{
-    int len = strlen(s);
-
-    return (len > 0) && (s[len-1] == 's');
-}
-
 void
-yyunits(struct atjobtime *at, int offset)
+yyunit(atjobtime *at, int which, int plural)
 {
-    if ( at->plural ) {
-	if ( offset == 1)
-	    yyerror("quantity error");
-    }
-    else {
-	if ( offset != 1)
-	    yyerror("quantity error");
-    }
-    at->offset = offset;
+
+    at->units = which;
+    at->plural = plural;
 }
 
 static int
@@ -52,11 +38,11 @@ yyset(struct atjobtime *at, int value, int unit)
     
     switch (unit) {
     case MINUTE:if (at->hour == 12 || at->hour == 24)
-		    good = (value == 0) ;
+		    good = (value <= 30) ;
 		else
 		    good = ok(0,value,59);
 		break;
-    case HOUR:  good = ok(0,value, (at->pm >= 0) ? 12 : 24 ); break;
+    case HOUR:  good = ok(0,value, (at->pm ? 12 : 24) ); break;
     case DAY:   good = ok(1,value,31); break;
     case MONTH: good = ok(1,value,12); break;
     }
@@ -73,7 +59,9 @@ yysetdate(struct atjobtime *at, int day, int month, int year)
 {
     at->day = yyset(at, day, DAY);
     at->month = yyset(at, month, MONTH)-1;
-    at->year = year;
+    if ( year ) {
+	at->year = year;
+    }
 }
 
 
@@ -83,12 +71,13 @@ yywrap()
     return 1;
 }
 
+
 static atjobtime *yy_at;
+
 
 int
 yy_input_me(char *bfr, int wanted)
 {
-
     if ( yy_index >= yy_size-1 )
 	return 0;
 	
@@ -107,10 +96,14 @@ int
 yy_prepare(atjobtime *at, int argc, char **argv)
 {
     int i;
-    
+    time_t tt;
+    struct tm* tm;
+
+    time(&tt);
+    tm = localtime(&tt);
+
     bzero(at, sizeof *at);
-    at->mode = DATE;
-    at->year = at->month = at->day = at->pm = -1;
+    at->hour = at->minute = -1;
     
     yy_at = at;
     
@@ -142,142 +135,117 @@ yy_prepare(atjobtime *at, int argc, char **argv)
 
 %token NUMBER DOT COLON AM PM NOON MIDNIGHT TEATIME TODAY TONIGHT 
 %token TOMORROW DAY WEEK MONTH YEAR FROM NOW NEXT MINUTE HOUR DASH
-%token SLASH PLUS MONTHNAME EXACTLY SOONEST DAYNAME
+%token SLASH PLUS MONTHNAME EXACTLY SOONEST DAYNAME COMMA
 %token ERROR
 
 %%
 
-when:	EXACTLY date_offset FROM NOW
-	{ yy_at->mode = EXACT_OFFSET; }
-    |	delay_time
-    |	delay_days
+when:	NOW PLUS offset
+    |	time
     |	time date
-	{ yy_at->mode = DATE; }
-    |   time delay_days
-    |	time next_interval
-	{ yy_at->mode = DATE; }
+    |	date
     ;
 
-next_interval:	NEXT next_offset
-		{ yy_at->mode = DATE; }
-	    |	DAYNAME
-		{ yy_at->special = DAYNAME; yy_at->offset = yylval; }
-	    ;
+date:	PLUS offset
+    |   from_now
+    |	NEXT nxunit
+    |	datespec
+    |	specialdate
+    ;
 
-next_offset:	WEEK
-		{ yy_at->special = WEEK; }
-	|	MONTH
-		{ yy_at->special = MONTH; }
-	|	YEAR
-		{ yy_at->special = YEAR; }
-	|	DAYNAME
-		{ yy_at->special = DAYNAME; yy_at->offset = yylval; }
-	;
-
-delay_time:	PLUS time_offset
-		{ yy_at->mode = EXACT_OFFSET; }
-	|	time_offset FROM NOW
-		{ yy_at->mode = EXACT_OFFSET; }
-	|	next_interval
-		{ yy_at->mode = DATE; }
-	;
-
-delay_days:	PLUS date_offset
-		{ yy_at->mode = OFFSET; }
-	|	date_offset FROM NOW
-		{ yy_at->mode = OFFSET; }
+from_now:	EXACTLY offset FROM NOW
+	|	offset FROM NOW
 	;
 	
-
-date_offset:	NUMBER day_interval
-		{ yyunits(yy_at, $1); }
-	    ;
-
-time_offset:	NUMBER interval
-		{ yyunits(yy_at, $1); }
-		;
-
-interval:	MINUTE
-		{ yy_at->units = MINUTE; yy_at->plural = $1; }
-	|	HOUR
-		{ yy_at->units = HOUR; yy_at->plural = $1; }
+offset:		NUMBER unit
+		{ yy_at->offset = $1; }
+	|	unit
+		{ yy_at->offset = 1; }
 	;
-
-day_interval:	DAY
-		{ yy_at->units = DAY; yy_at->plural = $1; }
-	    |	WEEK
-		{ yy_at->units = WEEK; yy_at->plural = $1; }
-	    |	MONTH
-		{ yy_at->units = MONTH; yy_at->plural = $1; }
-	    |	YEAR
-		{ yy_at->units = YEAR; yy_at->plural = $1; }
-	    ;
-
-time:	NUMBER ampm
-	{   yy_at->minute = 0;
-	    yy_at->hour = yyset(yy_at, $1, HOUR); }
-    |	NUMBER COLON NUMBER optional_ampm
-	{   yy_at->minute = yyset(yy_at, $3, MINUTE);
-	    yy_at->hour = yyset(yy_at, $1, HOUR); }
-    |	NOON
-	{ yy_at->hour = 12; yy_at->minute = 0; }
-    |	MIDNIGHT
-	{ yy_at->hour = 23; yy_at->minute = 60; }
-    |	TEATIME
-	{ yy_at->hour = 16; yy_at->minute = 0; }
+	
+nxunit:		DAYNAME
+		{ yy_at->special = DAYNAME; yy_at->offset = $1; }
+	|	dayunit
+		{ yy_at->offset = 1; }
+	;
+	
+unit:	MINUTE
+	{ yyunit(yy_at, MINUTE, $1); }
+    |	HOUR
+	{ yyunit(yy_at, HOUR, $1); }
+    |	DAY
+	{ yyunit(yy_at, DAY, $1); }
+    |	dayunit
     ;
     
-ampm:	AM
-	{ yy_at->pm = 0; }
-    |	PM
-	{ yy_at->pm = 1; }
-    ;
+dayunit:	WEEK
+		{ yyunit(yy_at, WEEK, $1); }
+	|	MONTH
+		{ yyunit(yy_at, MONTH, $1); }
+	|	YEAR
+		{ yyunit(yy_at, YEAR, $1); }
+	;
 
-optional_ampm:	/* doesn't need to be here */
-	    |	ampm
+specialdate:	TODAY
+		{ yy_at->special = TODAY; }
+	    |	TOMORROW
+		{ yy_at->special = TOMORROW; }
+	    |	TONIGHT
+		{ yy_at->special = TONIGHT; }
+	    |	DAYNAME
+		{ yy_at->special = DAYNAME; yy_at->offset = $1; }
 	    ;
 
-date:	/* doesn't need to be here */
-	{ yy_at->special = SOONEST; }
-    |	TODAY
-	{ yy_at->special = TODAY; }
-    |	TONIGHT
-	{ yy_at->special = TONIGHT; }
-    |	TOMORROW
-	{ yy_at->special = TOMORROW; }
-    |	slashed_date
-    |	dotted_date
-    |	dashed_date
-    |   month_date
+time:	NOON
+	{ yy_at->hour = 12; yy_at->minute = 0; }
+    |	TEATIME
+	{ yy_at->hour = 16; yy_at->minute = 0; }
+    |	MIDNIGHT
+	{ yy_at->hour = 24; yy_at->minute = 0; }
+    |	NUMBER ampm
+	{ yy_at->hour = $1; yy_at->minute = 0; }
+    |	NUMBER COLON NUMBER optampm
+	{ yy_at->hour = $1; yy_at->minute = $3; }
     ;
+
+optampm:	/* empty */
+	|	ampm
+	;
+
+ampm:	AM
+	{ yy_at->pm = 1; }
+    |	PM
+	{ yy_at->pm = 2; }
+    ;
+
+datespec:	slashed_date
+	|	dotted_date
+	|	named_date
+	;
 
 slashed_date:	NUMBER SLASH NUMBER SLASH NUMBER
 		{ yysetdate(yy_at, $3, $1, $5); }
 	    ;
 
-dotted_date:	NUMBER DOT NUMBER DOT NUMBER
+dotted_date:	NUMBER DOT NUMBER
+		{ yysetdate(yy_at, $1, $3, 0); }
+	    |	NUMBER DOT NUMBER DOT NUMBER
 		{ yysetdate(yy_at, $1, $3, $5); }
 	    ;
 
-dashed_date:	date_with_dashes
-	    |	date_without_dashes
-	    ;
-
-month_date:	MONTHNAME NUMBER
-		{ yysetdate(yy_at, $2, $1, -1); }
+named_date:	NUMBER DASH MONTHNAME
+		{ yysetdate(yy_at, $1, $3, 0); }
+	    |	NUMBER DASH MONTHNAME DASH NUMBER
+		{ yysetdate(yy_at, $1, $3, $5); }
+	    |	MONTHNAME NUMBER
+		{ yysetdate(yy_at, $2, $1, 0); }
 	    |	MONTHNAME NUMBER NUMBER
 		{ yysetdate(yy_at, $2, $1, $3); }
+	    |	MONTHNAME NUMBER COMMA NUMBER
+		{ yysetdate(yy_at, $2, $1, $4); }
+	    |	NUMBER MONTHNAME
+		{ yysetdate(yy_at, $1, $2, 0); }
+	    |	NUMBER MONTHNAME NUMBER
+		{ yysetdate(yy_at, $1, $2, $3); }
 	    ;
-
-date_with_dashes:	NUMBER DASH MONTHNAME
-			{ yysetdate(yy_at, $1, $3, -1); }
-		|	NUMBER DASH MONTHNAME DASH NUMBER
-			{ yysetdate(yy_at, $1, $3, $5); }
-		;
-
-date_without_dashes:	NUMBER MONTHNAME
-			{ yysetdate(yy_at, $1, $2, -1); }
-		    |	NUMBER MONTHNAME NUMBER
-			{ yysetdate(yy_at, $1, $2, $3); }
-		    ;
 

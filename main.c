@@ -37,51 +37,21 @@ abend(char *fmt, ...)
 }
 
 
-static void
-dump(atjobtime *a)
+int
+plural(char *s)
 {
-    if (a->mode == DATE) {
-	fprintf(stderr, "<%d:%02d", a->hour, a->minute);
-	if (a->pm >= 0)
-	    fprintf(stderr," %s", a->pm ? "pm" : "am");
-	switch (a->special) {
-	case TODAY:
-	    fprintf(stderr, " today");
-	    break;
-	case TONIGHT:
-	    fprintf(stderr, " tonight");
-	    break;
-	case TOMORROW:
-	    fprintf(stderr, " tomorrow");
-	    break;
-	case SOONEST:
-	    fprintf(stderr, " soonest");
-	    break;
-	default:
-	    fprintf(stderr, " %d.%d", a->day, a->month + 1);
-	break;
-	}
-	if (a->year > 0)
-	    fprintf(stderr, ".%d", a->year);
-	fputc('>',stderr);
-    }
-    else {
-	fputc('<',stderr);
-	if (a->mode == EXACT_OFFSET)
-	    fprintf(stderr,"%d:%02d %s, ",
-		    a->hour,a->minute,
-		    a->pm ? "pm":"am");
-	fprintf(stderr, "offset=%d,units=%d%s>",
-		a->offset,a->units,
-		(a->mode==OFFSET)?"":",EXACT");
-    }
-    fputc('\n', stderr);
+    int len = strlen(s);
+
+    return (len > 0) && (s[len-1] == 's');
 }
 
 
 static void
 offset(atjobtime *at, struct tm *tm)
 {
+    if ( (at->offset == 1 && at->plural) || (at->offset != 1 && !at->plural) )
+	abend("syntax error (pluralization)");
+    
     switch (at->units) {
     case MINUTE:	tm->tm_min += at->offset;
 			break;
@@ -105,73 +75,57 @@ maketime(atjobtime *at)
     time_t now, madetime;
     struct tm *t;
 
-    if (at->pm > 0) at->hour += 12;
-    
+    if ( at->hour > (at->pm  ? 12 : 24) )
+	abend("incorrect time of day");
+	
+    if (at->pm == 2) at->hour += 12;
+
     time(&now);
     t = localtime(&now);
 
+    if (debug & 0x04) {
+	madetime = mktime(t);
+	printf("now: %s", ctime(&madetime));
+    }
+    
     t->tm_sec = 0;
     t->tm_isdst = -1;
 
-    switch (at->mode) {
-    case DATE:
-	    t->tm_hour = at->hour;
-	    t->tm_min = at->minute;
-	    t->tm_wday %= 7;
-	    
-	    switch (at->special) {
-	    case TODAY:	break;
-	    case WEEK:	t->tm_mday += (7+1)  - t->tm_wday;
-			break;
-	    case MONTH:	t->tm_mon ++;
-			t->tm_mday = 1;
-			break;
-	    case YEAR:	t->tm_year ++;
-			t->tm_mon = 0;
-			t->tm_mday = 1;
-			break;
-	    case DAYNAME:
-			if ( t->tm_wday < at->offset )
-			    t->tm_mday += (at->offset - t->tm_wday);
-			else
-			    t->tm_mday += 7 - (at->offset - t->tm_wday);
-			break;
-	    case TOMORROW:
-			t->tm_mday++;
-			break;
-	    case TONIGHT:
-			if ( (at->pm <= 0) && (at->hour < 6) )
-			    t->tm_mday ++;
-			break;
-	    case SOONEST:
-			if ( mktime(t) < now )
-			    t->tm_mday ++;
-			break;
-	    default:	t->tm_mday = at->day;
-			if (at->month >= 0)
-			    t->tm_mon = at->month;
-			if ( at->year != -1 )
-			    t->tm_year = at->year - 1900;
-			else if ( mktime(t) < now )
-			    t->tm_year ++;
-			break;
-	    }
-	    break;
-    case OFFSET:
-	    t->tm_hour = at->hour;
-	    t->tm_min = at->minute;
-    case EXACT_OFFSET:
-	    offset(at,t);
-	    break;
-    }
-    madetime = mktime(t);
+    if (at->hour >= 0) t->tm_hour = at->hour;
+    if (at->minute >= 0) t->tm_min = at->minute;
+    if (at->day > 0) t->tm_mday = at->day;
+    if (at->month > 0) t->tm_mon = at->month-1;
+    if (at->year > 0) t->tm_year = at->year - 1900;
 
-    if (madetime < now) {
-	abend("cannot travel back in time\n");
-	if ( debug & 0x01 )
-	    dump(at);
-	exit(1);
+    if (at->units)
+	offset(at,t);
+
+    switch (at->special) {
+    case TODAY:	break;
+    case DAYNAME:
+		if ( t->tm_wday < at->offset )
+		    t->tm_mday += (at->offset - t->tm_wday);
+		else
+		    t->tm_mday += 7 + (at->offset - t->tm_wday);
+		break;
+    case TOMORROW:
+		t->tm_mday++;
+		break;
+    case TONIGHT:
+		if ( (at->pm != 2) && (at->hour < 6) )
+		    t->tm_mday ++;
+		break;
+    default:	madetime = mktime(t);
+		if (madetime < now) {
+		    if (at->year == 0) t->tm_year ++;
+		    else  t->tm_mday ++;
+		}
+		break;
     }
+
+    if ( (madetime = mktime(t)) < now )
+	abend("cannot travel back in time");
+    
     return madetime;
 }
 
@@ -320,7 +274,7 @@ char **argv;
     jobtime = maketime(&at);
 
     if ( debug & 0x01 )
-	fprintf(stderr, "job time = %s", ctime(&jobtime));
+	fprintf(stderr, "job: %s", ctime(&jobtime));
     if ( debug & 0x02 )
 	exit(0);
     savejob(jobtime);
