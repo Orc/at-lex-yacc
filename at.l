@@ -27,6 +27,16 @@ extern int plural(char *s);
 \:		{ SAY return COLON; }
 AM		{ SAY return AM; }
 PM		{ SAY return PM; }
+ONE		{ SAY yylval = 1; return NUMBER; }
+TWO		{ SAY yylval = 2; return NUMBER; }
+THREE		{ SAY yylval = 3; return NUMBER; }
+FOUR		{ SAY yylval = 4; return NUMBER; }
+FIVE		{ SAY yylval = 5; return NUMBER; }
+SIX		{ SAY yylval = 6; return NUMBER; }
+SEVEN		{ SAY yylval = 7; return NUMBER; }
+EIGHT		{ SAY yylval = 8; return NUMBER; }
+NINE		{ SAY yylval = 9; return NUMBER; }
+TEN		{ SAY yylval = 10; return NUMBER; }
 NOON		{ SAY return NOON; }
 MIDNIGHT	{ SAY return MIDNIGHT; }
 TEATIME		{ SAY return TEATIME; }

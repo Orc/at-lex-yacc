@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "at.h"
 #include "y.tab.h"
@@ -88,7 +89,7 @@ maketime(atjobtime *at)
 	printf("now: %s", ctime(&madetime));
     }
     
-    t->tm_sec = 0;
+    /*t->tm_sec = 0;*/
     t->tm_isdst = -1;
 
     if (at->hour >= 0) t->tm_hour = at->hour;
@@ -126,6 +127,8 @@ maketime(atjobtime *at)
     if ( (madetime = mktime(t)) < now )
 	abend("cannot travel back in time");
     
+    if ( debug & 0x08 )
+	printf("%ld\n", madetime-now);
     return madetime;
 }
 
@@ -137,10 +140,8 @@ savejob(time_t when)
     char *v, *r;
     char job[1+16+4+1];	/* 1 (id) + 16 (date) + 4 (extension) + 1 (0) */
     unsigned short seq = 0;
-    FILE *output;
+    FILE *output = 0 /* meaningless, but it shuts gcc the fuck up */;
     char *pwd;
-    uid_t uid = getuid();
-    gid_t gid = getgid();
     int size;
 
     if ( (pwd = malloc(size=1024)) == 0 )
@@ -156,10 +157,10 @@ savejob(time_t when)
 	abend("%s", strerror(errno));
 
     while (1) {
-	if (sizeof(when) == 4)
-	    snprintf(job, sizeof job, "a%08x%04x", when, seq);
+	if (sizeof(when) > 4)
+	    snprintf(job, sizeof job, "a%016lx%04x", when, seq);
 	else
-	    snprintf(job, sizeof job, "a%016x%04x", when, seq);
+	    snprintf(job, sizeof job, "a%08lx%04x", when, seq);
 
 	if ( (fd = open(job, O_CREAT|O_EXCL|O_WRONLY, 0600)) != -1 )
 	    break;
@@ -235,7 +236,7 @@ char **argv;
 {
     atjobtime at;
     time_t jobtime;
-    int i, opt;
+    int opt;
     int redirect = 0;
 
     pgm = basename(argv[0]);
@@ -275,7 +276,7 @@ char **argv;
 
     if ( debug & 0x01 )
 	fprintf(stderr, "job: %s", ctime(&jobtime));
-    if ( debug & 0x02 )
-	exit(0);
-    savejob(jobtime);
+    if ( !(debug & 0x02) )
+	savejob(jobtime);
+    exit(0);
 }
