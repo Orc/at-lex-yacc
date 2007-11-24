@@ -1,6 +1,8 @@
 #ifndef _AT_H
 #define _AT_H 1
 
+#include <time.h>
+
 typedef struct atjobtime {
     int minute, hour, day, month, year;
     int units;		/* MINUTE HOUR DAY WEEK MONTH YEAR */
@@ -15,6 +17,7 @@ typedef struct atjobtime {
 
 #define ATDIR	"/var/spool/cron/atjobs"
 
+extern time_t maketime(int,char**);
 extern int yyparse(), yylex();
 extern int yy_prepare(atjobtime *,int,char **);
 extern void abend(char *, ...);

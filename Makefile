@@ -1,4 +1,4 @@
-OBJS=lex.yy.o y.tab.o main.o
+OBJS=lex.yy.o y.tab.o main.o maketime.o
 LIBES=-ll
 CFLAGS=-O -g
 

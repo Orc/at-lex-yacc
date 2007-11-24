@@ -13,7 +13,7 @@ extern YYSTYPE yylval;
 #endif
 
 extern int yy_input_me(char *buf, int size);
-extern int plural(char *s);
+extern int yy_plural(char *s);
 
 #define YY_INPUT(b,r,max)	(r = yy_input_me(b,max))
 %}
@@ -44,12 +44,12 @@ TODAY		{ SAY return TODAY; }
 TONIGHT		{ SAY return TONIGHT; }
 TOMORROW	{ SAY return TOMORROW; }
 YESTERDAY	{ SAY return YESTERDAY; }
-MINUTES?	{ SAY yylval = plural(yytext); return MINUTE; }
-HOURS?		{ SAY yylval = plural(yytext); return HOUR; }
-DAYS?		{ SAY yylval = plural(yytext); return DAY; }
-WEEKS?		{ SAY yylval = plural(yytext); return WEEK; }
-MONTHS?		{ SAY yylval = plural(yytext); return MONTH; }
-YEARS?		{ SAY yylval = plural(yytext); return YEAR; }
+MINUTES?	{ SAY yylval = yy_plural(yytext); return MINUTE; }
+HOURS?		{ SAY yylval = yy_plural(yytext); return HOUR; }
+DAYS?		{ SAY yylval = yy_plural(yytext); return DAY; }
+WEEKS?		{ SAY yylval = yy_plural(yytext); return WEEK; }
+MONTHS?		{ SAY yylval = yy_plural(yytext); return MONTH; }
+YEARS?		{ SAY yylval = yy_plural(yytext); return YEAR; }
 FROM		{ SAY return FROM; }
 NOW		{ SAY return NOW; }
 NEXT		{ SAY return NEXT; }
