@@ -5,7 +5,7 @@ CFLAGS=-O -g -L.
 AR=ar
 RANLIB=ranlib
 
-PROGS=at
+PROGS=at atq
 
 all: $(PROGS)
 
@@ -15,6 +15,9 @@ clean:
 test: at tests runtests
 	@sh ./runtests < tests
 
+atq: atq.o
+	$(CC) $(CFLAGS) -o atq atq.o
+	
 at: $(OBJS) libmaketime.a
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
 

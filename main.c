@@ -66,6 +66,7 @@ savejob(time_t when)
     unsigned short seq = 0;
     FILE *output = 0 /* meaningless, but it shuts gcc the fuck up */;
     char *pwd;
+    struct passwd *user = getpwuid(getuid());
     int size;
 
     if ( (pwd = malloc(size=1024)) == 0 )
@@ -81,10 +82,7 @@ savejob(time_t when)
 	abend("%s", strerror(errno));
 
     while (1) {
-	if (sizeof(when) > 4)
-	    snprintf(job, sizeof job, "a%016lx%04x", when, seq);
-	else
-	    snprintf(job, sizeof job, "a%08lx%04x", when, seq);
+	snprintf(job, sizeof job, "c%05lx%08lx", seq, when/60);
 
 	if ( (fd = open(job, O_CREAT|O_EXCL|O_WRONLY, 0600)) != -1 )
 	    break;
@@ -93,15 +91,25 @@ savejob(time_t when)
 	else if ( ++seq == 0 )
 	    abend("spool is full -- can't save job");
     }
-    if ( (fchown(fd, getuid(), getgid()) == -1) || 
-					((output = fdopen(fd, "w")) == 0) ) {
+    if ( (fchown(fd, getuid(), getgid()) == -1)
+	   || ((output = fdopen(fd, "w")) == 0) ) {
 	unlink(job);
 	abend("spool: %s", strerror(errno));
     }
+
+    fprintf(output, "#! /bin/sh\n");
+    
+    /*
+     * write a koeneg-at compatable header
+     */
+    fprintf(output, "# atrun uid=%d gid=%d\n", getuid(), getgid());
+    fprintf(output, "# mail      %s %d\n", user->pw_name, notify);
     
     /* 
      * write out the environment
      */
+    fprintf(output, "umask %o\n", i=umask(0777)); umask(i);
+    
     for (i=0; environ[i]; i++) {
 	/* weed out tty-specific variables
 	 */
@@ -124,7 +132,7 @@ savejob(time_t when)
 	    fputc('=',output);
 	    for (r=v+1; *r; ++r) {
 		if ( isprint(*r) ) {
-		    if ( !isalnum(*r) )
+		    if ( ! (isalnum(*r) || *r == '/' || *r == ':') )
 			fputc('\\', output);
 		    fputc(*r, output);
 		}
@@ -137,7 +145,7 @@ savejob(time_t when)
 	}
     }
 
-    fprintf(output, "cd %s || exit 1\n", pwd);
+    fprintf(output, "\ncd %s || exit 1\n\n", pwd);
 
     size = 0;
     while ( (c = getchar()) != EOF )
