@@ -61,8 +61,17 @@ static void
 yysetdate(struct atjobtime *at, int day, int month, int year)
 {
     at->day = yyset(at, day, DAY);
-    at->month = yyset(at, month, MONTH)-1;
+    at->month = yyset(at, month, MONTH);
     if ( year ) {
+
+	if ( year < 100 ) {
+	    time_t now;
+	    struct tm *tm;
+
+	    time(&now);
+	    if ( tm = localtime(&now) )
+		year += (tm->tm_year/100) * 100;
+	}
 	at->year = year;
     }
 }
