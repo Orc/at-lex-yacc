@@ -10,7 +10,7 @@ PROGS=at atq
 all: $(PROGS)
 
 clean:
-	rm -f $(OBJS) $(PROGS) lex.yy.c y.tab.c y.tab.h
+	rm -f *.o $(PROGS) lex.yy.c y.tab.c y.tab.h
 
 test: at tests runtests
 	@sh ./runtests < tests

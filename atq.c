@@ -60,14 +60,14 @@ main(int argc, char **argv)
 		    if (needheader) {
 			putchar(' ');
 			if (iamroot)
-			    printf(" %-8s", "user");
-			printf(" %-13s %s\n", "job", "time");
+			    printf("%-8s ", "user");
+			printf("%-13s %10s%s\n", "job", "", "  time");
 			needheader=0;
 		    }
 		    jobtime *= 60;
 		    if (iamroot)
-			printf(" %-8s", pwd->pw_name);
-		    printf(" %-13s %s", de->d_name, ctime(&jobtime));
+			printf("%-8s ", pwd->pw_name);
+		    printf("%-13s %10s%s", de->d_name, "", ctime(&jobtime));
 		}
 	    }
 	closedir(p);
