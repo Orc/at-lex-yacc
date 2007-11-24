@@ -1,7 +1,7 @@
-OBJS=main.o libmaketime.a
+OBJS=main.o
 LOBJS=lex.yy.o y.tab.o maketime.o
-LIBES=-ll
-CFLAGS=-O -g
+LIBES=-ll -lmaketime
+CFLAGS=-O -g -L.
 AR=ar
 RANLIB=ranlib
 
@@ -15,7 +15,7 @@ clean:
 test: at tests runtests
 	@sh ./runtests < tests
 
-at: $(OBJS)
+at: $(OBJS) libmaketime.a
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
 
 libmaketime.a: $(LOBJS)
