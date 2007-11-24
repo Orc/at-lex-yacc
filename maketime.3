@@ -1,0 +1,89 @@
+.\"
+.Dd November 23, 2007
+.Dt MAKETIME 3
+.Os Mastodon
+.Sh NAME
+.Nm maketime
+.Nd parse an at-format date
+.Sh SYNOPSIS
+.Fd #include \&"at.h\&"
+.Ft time_t
+.Fn makefile "int argc" "char **argv" "int (*error)(char *,...)"
+.Sh DESCRIPTION
+The
+.Fn makefile
+function
+parses the at-format date string contained in
+.Fa argc
+and
+.Fa
+and returns the time_t value that it compiles to.
+.Pp
+The date string consists of an optional
+.Em time ,
+an optional
+.Em date ,
+or a time offset.   The
+time may be
+.Pa HH:MM ,
+.Pa HH am/pm ,
+or the symbolic names
+.Em noon ,
+.Em teatime
+(4pm,) or
+.Em midnight .
+The date can be
+.Pa MM/DD ,
+.Pa MM/DD/YY ,
+.Pa DD.MM ,
+.Pa DD.MM.YY ,
+.Pa DD-Month ,
+.Pa DD-Month-YY ,
+.Pa DD\ Month ,
+.Pa DD\ Month\ YY ,
+.Pa Month DD ,
+or
+.Pa Month DD, YY 
+( if the
+.Em YY
+is two digits, it's assumed to be the year within the current
+century .)
+.Pp
+Date offsets may be prefixed with a time, and are of the form
+.Em +
+.Pa quantity units
+or
+.Pa quantity units
+.Em from
+.Pa specific-date .
+A specific date is a day of the week,
+,Em today ,
+.Em tomorrow ,
+or
+.Em yesterday .
+.Pp
+In addition, the names
+.Em one 
+through
+.Em ten
+are recognised as the numbers 1 through 10.
+.Sh RETURN VALUES
+Upon successful completion
+.Fn
+returns the
+.Tn time_t
+date that the at date compiles to,
+otherwise
+.Dv 0
+is returned.
+.Sh ERRORS
+When an error is detected,
+.Nm
+calls the user-supplied
+.Pa error
+function to report the error before it
+returns.   If no error function was supplied,
+.Nm
+merely prints a diagnostic to stderr and returns.
+.Sh SEE ALSO
+.Xr at 1 .
