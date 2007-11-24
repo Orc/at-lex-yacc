@@ -9,14 +9,17 @@ static char      *yy_source = 0;
 static int        yy_size = 0;
 static int        yy_index = 0;
 
-void
+static void (*yy_abend)(char*,...) = 0;
+
+static void
 yyerror(const char *why)
 {
-    abend("%s", why);
+    if ( yy_abend )
+	(*yy_abend)("%s", why);
+    fprintf(stderr, why);
 }
 
-
-void
+static void
 yyunit(atjobtime *at, int which, int plural)
 {
 
@@ -31,7 +34,7 @@ ok(int min, int value, int max)
 }
 
 
-int
+static int
 yyset(struct atjobtime *at, int value, int unit)
 {
     int good = 1;
@@ -54,7 +57,7 @@ yyset(struct atjobtime *at, int value, int unit)
 }
 
 
-void
+static void
 yysetdate(struct atjobtime *at, int day, int month, int year)
 {
     at->day = yyset(at, day, DAY);
@@ -93,7 +96,7 @@ yy_input_me(char *bfr, int wanted)
 
 
 int
-yy_prepare(atjobtime *at, int argc, char **argv)
+yy_prepare(atjobtime *at, int argc, char **argv,void (*abend)(char*,...))
 {
     int i;
     time_t tt;
@@ -104,6 +107,7 @@ yy_prepare(atjobtime *at, int argc, char **argv)
 
     bzero(at, sizeof *at);
     at->hour = at->minute = -1;
+    at->abend = yy_abend = abend;
     
     yy_at = at;
     

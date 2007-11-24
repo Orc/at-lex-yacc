@@ -35,7 +35,7 @@ static void
 offset(atjobtime *at, struct tm *tm)
 {
     if ( (at->offset == 1 && at->plural) || (at->offset != 1 && !at->plural) )
-	abend("syntax error (pluralization)");
+	at->abend("syntax error (pluralization)");
     
     switch (at->units) {
     case MINUTE:	tm->tm_min += at->offset;
@@ -58,21 +58,22 @@ offset(atjobtime *at, struct tm *tm)
  * parse an at time.
  */
 time_t
-maketime(int argc, char **argv)
+maketime(int argc, char **argv, void (*abend)(char*,...))
 {
     time_t now, madetime;
     struct tm *t;
     atjobtime at;
 
-    if ( yy_prepare(&at, argc, argv) <= 0 ) {
-	abend("%s", strerror(errno));
+    if ( yy_prepare(&at, argc, argv, abend) <= 0 ) {
+	(*abend)("%s", strerror(errno));
 	return 0;
     }
 
-    yyparse();	/* dies if it can't successfully parse the time */
+    if (yyparse() != 0)
+	return 0;
 
     if ( at.hour > (at.pm  ? 12 : 24) ) {
-	abend("incorrect time of day");
+	at.abend("incorrect time of day");
 	return 0;
     }
 
@@ -121,6 +122,6 @@ maketime(int argc, char **argv)
     if ( (madetime = mktime(t)) >= now)
 	return madetime;
 
-    abend("cannot travel back in time");
+    at.abend("cannot travel back in time");
     return 0;
 } /* maketime */

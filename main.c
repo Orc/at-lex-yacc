@@ -20,16 +20,16 @@
  */
 extern char **environ;
 
-int notify = 0;		/* notify the user when the job finishes */
-int debug = 0;		/* various debugging flags for development */
+static int notify = 0;		/* notify the user when the job finishes */
+static int debug = 0;		/* various debugging flags for development */
 
-char *pgm;
+static char *pgm;
 
 
 /*
  * whine bitterly about something, then die a horrible death
  */
-void
+static void
 abend(char *fmt, ...)
 {
     va_list ptr;
@@ -46,7 +46,7 @@ abend(char *fmt, ...)
 /*
  * spit out a usage message, then die
  */
-void
+static void
 usage()
 {
     fprintf(stderr, "usage: %s [-m] [-f file] when << job\n", pgm);
@@ -57,7 +57,7 @@ usage()
 /*
  * write a job into the at spool
  */
-void
+static void
 savejob(time_t when)
 {
     int c, i, fd;
@@ -189,7 +189,7 @@ char **argv;
     if ( argc < 1 )
 	usage();
        
-    jobtime = maketime(argc, argv);
+    jobtime = maketime(argc, argv, abend);
 
     if ( debug & (0x04|0x08) )
 	time(&now);

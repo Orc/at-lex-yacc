@@ -11,15 +11,15 @@ typedef struct atjobtime {
     int value;
     int plural;		/* <interval>(s) */
     int pm;		/* 0 : unset; 1: am; 2: pm */
+    void (*abend)(char *,...);
 } atjobtime;
 
 #define YYSTYPE int
 
 #define ATDIR	"/var/spool/cron/atjobs"
 
-extern time_t maketime(int,char**);
+extern time_t maketime(int,char**,void(*)(char*,...));
 extern int yyparse(), yylex();
-extern int yy_prepare(atjobtime *,int,char **);
-extern void abend(char *, ...);
+extern int yy_prepare(atjobtime *,int,char **, void(*)(char*,...));
 
 #endif/*_AT_H*/
