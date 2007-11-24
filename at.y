@@ -147,24 +147,23 @@ when:	NOW PLUS offset
     ;
 
 date:	PLUS offset
-    |   from_now
+    |   fromnow
     |	NEXT nxunit
     |	datespec
     |	specialdate
     ;
 
-from_now:	EXACTLY offset FROM NOW
-	|	offset FROM NOW
+fromnow:	EXACTLY offset FROM fromtime
+	|	offset FROM fromtime
 	;
-	
+
 offset:		NUMBER unit
 		{ yy_at->offset = $1; }
 	|	unit
 		{ yy_at->offset = 1; }
 	;
 	
-nxunit:		DAYNAME
-		{ yy_at->special = DAYNAME; yy_at->offset = $1; }
+nxunit:		dayname
 	|	dayunit
 		{ yy_at->offset = 1; }
 	;
@@ -186,15 +185,23 @@ dayunit:	WEEK
 		{ yyunit(yy_at, YEAR, $1); }
 	;
 
+dayname:	DAYNAME
+		{ yy_at->special = DAYNAME; yy_at->value = $1; }
+	;
+
+fromtime:	specialdate
+		{ if (yy_at->special == TONIGHT) yy_at->special = TODAY; }
+	|	NOW
+	;
+
 specialdate:	TODAY
 		{ yy_at->special = TODAY; }
-	    |	TOMORROW
-		{ yy_at->special = TOMORROW; }
-	    |	TONIGHT
+	|	TONIGHT
 		{ yy_at->special = TONIGHT; }
-	    |	DAYNAME
-		{ yy_at->special = DAYNAME; yy_at->offset = $1; }
-	    ;
+	|	TOMORROW
+		{ yy_at->special = TOMORROW; }
+	|	dayname
+	;
 
 time:	NOON
 	{ yy_at->hour = 12; yy_at->minute = 0; }

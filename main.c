@@ -104,10 +104,10 @@ maketime(atjobtime *at)
     switch (at->special) {
     case TODAY:	break;
     case DAYNAME:
-		if ( t->tm_wday < at->offset )
-		    t->tm_mday += (at->offset - t->tm_wday);
+		if ( t->tm_wday < at->value )
+		    t->tm_mday += (at->value - t->tm_wday);
 		else
-		    t->tm_mday += 7 + (at->offset - t->tm_wday);
+		    t->tm_mday += 7 + (at->value - t->tm_wday);
 		break;
     case TOMORROW:
 		t->tm_mday++;

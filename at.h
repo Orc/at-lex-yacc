@@ -2,10 +2,11 @@
 #define _AT_H 1
 
 typedef struct atjobtime {
-    int special;
     int minute, hour, day, month, year;
-    int offset;
     int units;		/* MINUTE HOUR DAY WEEK MONTH YEAR */
+    int offset;
+    int special;	/* MONDAY TUESDAY ... SUNDAY TODAY TONIGHT TOMORROW */
+    int value;
     int plural;		/* <interval>(s) */
     int pm;		/* 0 : unset; 1: am; 2: pm */
 } atjobtime;
