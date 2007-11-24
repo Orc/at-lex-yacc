@@ -109,6 +109,9 @@ maketime(atjobtime *at)
 		else
 		    t->tm_mday += 7 + (at->value - t->tm_wday);
 		break;
+    case YESTERDAY:
+		t->tm_mday--;
+		break;
     case TOMORROW:
 		t->tm_mday++;
 		break;

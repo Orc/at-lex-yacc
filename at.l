@@ -43,6 +43,7 @@ TEATIME		{ SAY return TEATIME; }
 TODAY		{ SAY return TODAY; }
 TONIGHT		{ SAY return TONIGHT; }
 TOMORROW	{ SAY return TOMORROW; }
+YESTERDAY	{ SAY return YESTERDAY; }
 MINUTES?	{ SAY yylval = plural(yytext); return MINUTE; }
 HOURS?		{ SAY yylval = plural(yytext); return HOUR; }
 DAYS?		{ SAY yylval = plural(yytext); return DAY; }

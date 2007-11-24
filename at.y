@@ -135,7 +135,7 @@ yy_prepare(atjobtime *at, int argc, char **argv)
 
 %token NUMBER DOT COLON AM PM NOON MIDNIGHT TEATIME TODAY TONIGHT 
 %token TOMORROW DAY WEEK MONTH YEAR FROM NOW NEXT MINUTE HOUR DASH
-%token SLASH PLUS MONTHNAME EXACTLY SOONEST DAYNAME COMMA
+%token SLASH PLUS MONTHNAME EXACTLY SOONEST DAYNAME COMMA YESTERDAY
 %token ERROR
 
 %%
@@ -192,6 +192,8 @@ dayname:	DAYNAME
 fromtime:	specialdate
 		{ if (yy_at->special == TONIGHT) yy_at->special = TODAY; }
 	|	NOW
+	|	YESTERDAY
+		{ yy_at->special = YESTERDAY; }
 	;
 
 specialdate:	TODAY

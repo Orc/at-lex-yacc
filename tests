@@ -28,6 +28,10 @@ y:teatime next friday
 y:teatime monday
 y:teatime friday
 
+y:three weeks from tomorrow
+y:one month from friday
+y:three weeks from yesterday
+
 # errors
 
 n:exactly 30 seconds from now
