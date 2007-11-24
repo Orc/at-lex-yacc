@@ -1,6 +1,9 @@
-OBJS=lex.yy.o y.tab.o main.o maketime.o
+OBJS=main.o libmaketime.a
+LOBJS=lex.yy.o y.tab.o maketime.o
 LIBES=-ll
 CFLAGS=-O -g
+AR=ar
+RANLIB=ranlib
 
 PROGS=at
 
@@ -15,6 +18,10 @@ test: at tests runtests
 at: $(OBJS)
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
 
+libmaketime.a: $(LOBJS)
+	$(AR) rv libmaketime.a $(LOBJS)
+	$(RANLIB) libmaketime.a
+
 lex.yy.c: at.l
 	$(LEX) -i at.l
 
@@ -22,3 +29,6 @@ at.l: y.tab.h
 
 y.tab.h y.tab.c: at.y
 	$(YACC) -d at.y
+
+main.o: main.c y.tab.h at.h
+maketime.o: maketime.c y.tab.h at.h
