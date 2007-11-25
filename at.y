@@ -1,7 +1,12 @@
 %{
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdlib.h>
+#ifdef HAVE_MALLOC_H
+#   include <malloc.h>
+#endif
 #include "y.tab.h"
 #include "at.h"
 

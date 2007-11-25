@@ -9,9 +9,13 @@
 #include <stdarg.h>
 #include <time.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <pwd.h>
 #include <unistd.h>
 #include <ctype.h>
+#ifdef HAVE_LIBGEN_H
+#   include <libgen.h>
+#endif
 
 #include "at.h"
 #include "y.tab.h"
@@ -24,6 +28,20 @@ static int notify = 0;		/* notify the user when the job finishes */
 static int debug = 0;		/* various debugging flags for development */
 
 static char *pgm;
+
+
+#ifndef HAVE_BASENAME
+/*
+ * get the non-directory part of a pathname
+ */
+static char *
+basename(char *p)
+{
+    char *ret = strrchr(p, '/');
+
+    return ret ? (1+ret) : p;
+}
+#endif
 
 
 /*
@@ -166,7 +184,6 @@ int
 main(argc, argv)
 char **argv;
 {
-    atjobtime at;
     time_t now, jobtime;
     int opt;
     int redirect = 0;

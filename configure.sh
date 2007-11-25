@@ -6,12 +6,12 @@
 # make certain that what you quote is what you want to quote.
 
 ac_help='
---use-koenig-fmt	use koenig format filenames (qSSSSSDDDDDDDD)
+--with-posix-at		be more comparable with the rest of the Unix world
 --with-spooldir		where at jobs are spooled (/var/spool/cron/atjobs)'
 
 # load in the configuration file
 #
-TARGET=at-lex-yacc
+TARGET=libat
 USE_MAILWRAPPERS=T
 . ./configure.inc
 
@@ -54,7 +54,11 @@ if AC_CHECK_FUNCS basename; then
 fi
 
 case "$WITH_SPOOLDIR" in
-"") AC_DEFINE ATDIR \"/var/spool/cron/atjobs/\" ;;
+"") if [ "$WITH_POSIX_AT" ]; then
+	AC_DEFINE ATDIR \"/var/spool/atjobs/\"
+    else
+	AC_DEFINE ATDIR \"/var/spool/cron/atjobs/\"
+    fi ;;
 /*) AC_DEFINE ATDIR \"${WITH_QUEUEDIR}/\"
     ;;
 *)  AC_FAIL "The at spool directory [$WITH_QUEUEDIR] must be a full pathname."
@@ -65,85 +69,13 @@ AC_CHECK_FLOCK || AC_DEFINE NO_FLOCK
 
 AC_CHECK_HEADERS pwd.h grp.h ctype.h
 
-# compile a little test program that can handle the many permutations
-# of a user/group combo, since there doesn't seem to be a clean way of
-# doing it using just system level stuff.
-#             username  (uid,gid of this user)
-#             user.group (uid of user, gid of group)
-#             user.number (uid of user, specified gid)
-#             number.group (specified uid, gid of group)
-#             number.number (specified uid, gid)
-#
-cat << \EOF > $$.c
-#include <stdio.h>
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
-#include <ctype.h>
-
-main(int argc, char **argv)
-{
-    struct passwd *pwd;
-    struct group *grp;
-
-    char *p, *q;
-
-    fprintf(stderr, "%s: UID/GID dumper for configure.sh\n", argv[0]);
-    printf("av_UID=; av_GID=;\n");
-    if (argc <= 1)
-	exit(1);
-
-    for (p = argv[1]; *p && (*p != ':') && (*p != '.'); ++p)
-	;
-
-    if (*p) {
-	*p++ = 0;
-	if ( pwd = getpwnam(argv[1]) )
-	    printf("av_UID=%d;\n", pwd->pw_uid);
-	else {
-	    for (q=argv[1]; isdigit(*q); ++q)
-		;
-	    if (*q == 0)
-		printf("av_UID=%s;\n", argv[1]);
-	    else
-		exit(1);
-	}
-
-	if ( grp = getgrnam(p) )
-	    printf("av_GID=%d;\n", grp->gr_gid);
-	else {
-	    for (q=p; isdigit(*q); ++q)
-		;
-	    if (*q == 0)
-		printf("av_GID=%s;\n", q);
-	    else
-		exit(1);
-	}
-    }
-    else if (pwd = getpwnam(argv[1]) )
-	printf("av_UID=%d;\nav_GID=%d;\n", pwd->pw_uid, pwd->pw_gid);
-    else
-	exit(1);
-    exit(0);
-}
-EOF
-
-$AC_CC -o uid $$.c
-status=$?
-rm -f $$.c
-test $? -eq 0 || AC_FAIL "Could not compile UID/GID dumper"
-
-AC_DEFINE MAX_USERLEN	16
-
-eval `./uid nobody`
-if [ "$av_UID" -a "$av_GID" ]; then
-    AC_DEFINE NOBODY_UID	$av_UID
-    AC_DEFINE NOBODY_GID	$av_GID
+TLOGN "searching for lex/flex runtime library"
+if AC_LIBRARY yywrap -ll -lfl; then
+    TLOG " (found" ${AC_LIBS}")"
 else
-    AC_FAIL "The 'nobody' account does not exist"
+    TLOG " (not found)"
+    AC_FAIL "maketime requires lex/flex"
 fi
-
-rm -f uid
 
 [ "$OS_FREEBSD" -o "$OS_DRAGONFLY" ] || AC_CHECK_HEADERS malloc.h
 

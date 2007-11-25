@@ -1,6 +1,7 @@
 #ifndef _AT_H
 #define _AT_H 1
 
+#include "config.h"
 #include <time.h>
 
 typedef struct atjobtime {
@@ -15,8 +16,6 @@ typedef struct atjobtime {
 } atjobtime;
 
 #define YYSTYPE int
-
-#define ATDIR	"/var/spool/cron/atjobs"
 
 extern time_t maketime(int,char**,void(*)(char*,...));
 extern int yyparse(), yylex();

@@ -5,10 +5,27 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <pwd.h>
-
 #include "at.h"
 
 
+#ifndef HAVE_BASENAME
+#   include <string.h>
+#elif HAVE_LIBGEN_H
+#   include <libgen.h>
+#endif
+
+
+#ifndef HAVE_BASENAME
+static char*
+basename(char *p)
+{
+    char *ret = strrchr(p, '/');
+
+    return ret ? (1+ret) : p;
+}
+#endif
+
+int
 main(int argc, char **argv)
 {
     DIR *p;
@@ -18,12 +35,14 @@ main(int argc, char **argv)
     int opt, totals = 0, count = 0;
     int sort_by_creation_date = 0;
     uid_t me = getuid();
-    char *pgm = basename(argv[0]);
+    char *pgm;
     char q;
     int iamroot = !me;
     int needheader = 1;
     struct stat jobstat;
     struct passwd *pwd;
+
+    pgm = basename(argv[0]);
 
     while ( (opt=getopt(argc, argv, iamroot ? "cnu:" : "cn")) != EOF ) {
 	switch (opt) {
@@ -48,13 +67,13 @@ main(int argc, char **argv)
 	perror(ATDIR);
 	exit(1);
     }
-    
+
     if ( p = opendir(".") ) {
 	while ( de = readdir(p) )
-	    if ( (sscanf(de->d_name, "%c%5lx%8lx", &q, &seq, &jobtime) == 3)
-				 && (stat(de->d_name, &jobstat) == 0)
-				  && (iamroot || (me == jobstat.st_uid))
-				  && (pwd = getpwuid(jobstat.st_uid)) ) {
+	    if ( (sscanf(de->d_name, "%c%5x%8lx", &q, &seq, &jobtime) == 3)
+					&& (stat(de->d_name, &jobstat) == 0)
+				      && (iamroot || (me == jobstat.st_uid))
+				         && (pwd = getpwuid(jobstat.st_uid)) ) {
 		if (totals) count++;
 		else {
 		    if (needheader) {
