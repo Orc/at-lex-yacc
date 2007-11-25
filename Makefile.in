@@ -14,6 +14,9 @@ all: $(PROGS)
 clean:
 	rm -f *.o $(PROGS) lex.yy.c y.tab.c y.tab.h
 
+spotless distclean: clean
+	rm -f @GENERATED_FILES@ @CONFIGURE_FILES@
+
 test: at tests runtests
 	@sh ./runtests < tests
 
