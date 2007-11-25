@@ -1,6 +1,7 @@
 /*
  * at:   run a batch job at a given time (like go, but schedulable)
  */
+#include "config.h"
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
