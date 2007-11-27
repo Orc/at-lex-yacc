@@ -4,7 +4,7 @@ CFLAGS=@CFLAGS@ -L.
 AR=ar
 RANLIB=ranlib
 
-OBJS=main.o
+OBJS=at.o
 LOBJS=lex.yy.o y.tab.o maketime.o
 
 PROGS=at atq
@@ -30,16 +30,16 @@ libat.a: $(LOBJS)
 	$(AR) rv libat.a $(LOBJS)
 	$(RANLIB) libat.a
 
-lex.yy.c: at.l
-	$(LEX) -i at.l
+lex.yy.c: at.lex.l
+	$(LEX) -i at.lex.l
 
-at.l: y.tab.h
+at.lex.l: y.tab.h
 
-y.tab.h y.tab.c: at.y
-	$(YACC) -d at.y
+y.tab.h y.tab.c: at.gram.y
+	$(YACC) -d at.gram.y
 
 atq.o:      atq.c at.h config.h
 lex.yy.o:   lex.yy.c y.tab.h at.h config.h
-main.o:     main.c at.h config.h y.tab.h
+at.o:       at.c at.h config.h y.tab.h
 maketime.o: maketime.c at.h config.h y.tab.h
 y.tab.o:    y.tab.c y.tab.h at.h config.h
