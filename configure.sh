@@ -56,10 +56,13 @@ fi
 case "$WITH_SPOOLDIR" in
 "") if [ "$WITH_POSIX_AT" ]; then
 	AC_DEFINE ATDIR \"/var/spool/atjobs/\"
+	AC_SUB	ATDIR /var/spool/atjobs/
     else
 	AC_DEFINE ATDIR \"/var/spool/cron/atjobs/\"
+	AC_SUB ATDIR /var/spool/cron/atjobs/
     fi ;;
 /*) AC_DEFINE ATDIR \"${WITH_QUEUEDIR}/\"
+    AC_SUB ATDIR ${WITH_QUEUEDIR}/
     ;;
 *)  AC_FAIL "The at spool directory [$WITH_QUEUEDIR] must be a full pathname."
     ;;
@@ -81,4 +84,4 @@ fi
 
 AC_DEFINE CONFDIR '"'$AC_CONFDIR'"'
 
-AC_OUTPUT Makefile
+AC_OUTPUT Makefile atq.1

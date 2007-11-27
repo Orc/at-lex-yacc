@@ -1,0 +1,41 @@
+.\"
+.Dd November 27, 2007
+.Dt ATQ 1
+.Os MASTODON
+.Sh NAME
+.Nm atq
+.Nd print the atjob queue
+.Sh SYNOPSIS
+.Nm
+.Op Fl cn
+.Op Fl u Ar user
+.Sh DESCRIPTION
+.Nm
+Prints a summary of the user's jobs in the at queue. 
+If the user is the superuser, it shows the jobs for every user.
+.Pp
+The options are as follows:
+.Bl -tag -width usermenow
+.It Fl c
+Sort the job listing by submission date.
+.It Fl n
+Print the # of jobs in the queue.
+.It Fl u Ar user
+Print the jobs for the named user
+.Pq this option is only available to the superuser .
+.El
+.Pp
+The
+.Nm
+utility exits 0 on success, and >0 if an error occurs.
+.Sh FILES
+.Bl -tag -width @ATDIR@
+.It Pa @ATDIR@
+Directory containing job files
+.El
+.Sh SEE ALSO
+.Xr at 1 ,
+.Xr atrm 1 .
+.Sh AUTHOR
+.An David Parsons
+.Pq Li orc@pell.chi.il.us
