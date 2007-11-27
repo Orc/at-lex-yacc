@@ -7,7 +7,7 @@ RANLIB=ranlib
 OBJS=at.o
 LOBJS=lex.yy.o y.tab.o maketime.o
 
-PROGS=at atq
+PROGS=at atq atrm
 
 all: $(PROGS)
 
@@ -20,9 +20,6 @@ spotless distclean: clean
 test: at tests runtests
 	@sh ./runtests < tests
 
-atq: atq.o
-	$(CC) $(CFLAGS) -o atq atq.o
-	
 at: $(OBJS) libat.a
 	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
 

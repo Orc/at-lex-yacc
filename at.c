@@ -18,6 +18,8 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <syslog.h>
+
 #ifdef HAVE_LIBGEN_H
 #   include <libgen.h>
 #endif
@@ -189,6 +191,7 @@ savejob(time_t when)
 	unlink(job);
 	exit(1);
     }
+    syslog(LOG_INFO, "User %d, job %s", getuid(), job);
     if (verbose)
 	printf("%s %s", job, ctime(&when));
     exit(0);
@@ -232,6 +235,7 @@ char **argv;
     if ( argc < 1 )
 	usage();
        
+    openlog("at", LOG_PID, LOG_CRON);
     jobtime = maketime(argc, argv, abend);
 
     if ( debug & (0x04|0x08) )
