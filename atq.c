@@ -3,7 +3,7 @@
  * terms of use.
  */
 /*
- * show the contents of the atjob queue
+ * atq: show the contents of the atjob queue
  */
 #include <stdio.h>
 #include <sys/types.h>

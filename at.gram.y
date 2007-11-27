@@ -1,4 +1,8 @@
 %{
+/* Copyright 2007 by David Loren Parsons (orc@pell.chi.il.us)
+ * See the COPYRIGHT file included in this distribution for
+ * terms of use.
+ */
 #include "config.h"
 #include <stdio.h>
 #include <string.h>

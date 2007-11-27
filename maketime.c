@@ -1,3 +1,7 @@
+/* Copyright 2007 by David Loren Parsons (orc@pell.chi.il.us)
+ * See the COPYRIGHT file included in this distribution for
+ * terms of use.
+ */
 /*
  * maketime() converts an arglist into a time_t
  */
@@ -17,7 +21,7 @@
 #include "y.tab.h"
 
 /*
- * see if a token is pluralized or not.
+ * see if a token is pluralized or not (used by at.lex.l)
  */
 int
 yy_plural(char *s)
