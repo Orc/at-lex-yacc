@@ -1,3 +1,10 @@
+/* Copyright 2007 by David Loren Parsons (orc@pell.chi.il.us)
+ * See the COPYRIGHT file included in this distribution for
+ * terms of use.
+ */
+/*
+ * show the contents of the atjob queue
+ */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>

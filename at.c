@@ -1,3 +1,7 @@
+/* Copyright 2007 by David Loren Parsons (orc@pell.chi.il.us)
+ * See the COPYRIGHT file included in this distribution for
+ * terms of use.
+ */
 /*
  * at:   run a batch job at a given time (like go, but schedulable)
  */
