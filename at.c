@@ -31,6 +31,7 @@ extern char **environ;
 
 static int notify = 0;		/* notify the user when the job finishes */
 static int debug = 0;		/* various debugging flags for development */
+static int verbose = 0;		/* print job id & job time */
 
 static char *pgm;
 
@@ -184,8 +185,12 @@ savejob(time_t when)
 	}
 	else size ++;
     fclose(output);
-    if (size == 0)
+    if (size == 0) {
 	unlink(job);
+	exit(1);
+    }
+    if (verbose)
+	printf("%s %s", job, ctime(&when));
     exit(0);
 }
 
@@ -201,10 +206,13 @@ char **argv;
     pgm = basename(argv[0]);
     opterr = 1;
     
-    while ( (opt = getopt(argc,argv, "d:f:m")) != EOF )
+    while ( (opt = getopt(argc,argv, "d:f:mv")) != EOF )
 	switch (opt) {
 	case 'd':
 		debug = atoi(optarg);
+		break;
+	case 'v':
+		verbose = 1;
 		break;
 	case 'm':
 		notify = 1;

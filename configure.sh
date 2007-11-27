@@ -84,4 +84,4 @@ fi
 
 AC_DEFINE CONFDIR '"'$AC_CONFDIR'"'
 
-AC_OUTPUT Makefile atq.1
+AC_OUTPUT Makefile atq.1 at.1

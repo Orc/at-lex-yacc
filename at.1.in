@@ -1,0 +1,193 @@
+.\"     %A%
+.\"
+.Dd November 27, 2007
+.Dt AT 1
+.Os MASTODON
+.Sh NAME
+.Nm at
+.Nd execute commands at a specified time
+.Sh SYNOPSIS
+.Nm
+.Op Fl d Ar flags
+.Op Fl mp
+.Op Fl f Pa script
+.Ar time
+.Sh DESCRIPTION
+The
+.Nm
+utility read commands from the standard input or a
+specified file for execution at a later time.
+.Pp
+The job is executed in a separate process group by 
+.Xr sh 1 ,
+using the current environment (modulo some of the
+obviously shell-related variables) and 
+.Xr umask (1) .
+.Pp
+The options are as follows:
+.Bl -tag -width aa-script
+.It Fl d Ar flags
+Turn debugging on. 
+.Ar flags 
+is a bitmask of values that turn on and off various settings:
+.Bl -tag -width 0xff -compact
+.It Ar 0x01
+Print the job time.
+.It Ar 0x02
+Do not store that at job.
+.It Ar 0x04
+Print the current time before parsing the job time.
+.It Ar 0x08
+Print the # of seconds until the job time.
+.El
+.Pp
+The
+.Fl d
+flag is intended for testing and debugging, and may produce
+unexpected results if used in production.
+.It Fl f Pa script
+Take the commands from
+.Pa script
+instead of from stdin.
+.It Fl m
+Notify the user when the job has finished, via
+.Xr write 1 
+or
+.Xr mail 1 ,
+depending on whether the user is logged in or not.
+.It Fl v
+After submitting the job, display the job id and scheduled
+execution time.
+.El
+.Sh RETURN VALUES
+The
+.Nm
+utility exits 0 on success, and >0 if an error occurs.
+.Sh TIME SPECIFICATION
+.Pp
+.Nm
+has a fairly rich language for describing the job time.
+It is roughly in the format
+.Ar time Op ar date ,
+where you may either specify the traditional 
+.Em HH:MM MM/DD/YY
+date, or more complex formats.
+.Pp
+.Bl -tag -width date -compact
+.It Ar Time
+is in one of the following forms (or blank,
+which is the current time of day):
+.Bl -tag -width "HH:MM [ am/pm ]"  -compact
+.It Ar HH:MM Op am/pm
+The given time
+.It Em noon
+.It Em midnight
+.It Em teatime
+4pm.
+.El
+.Pp
+.It Ar Date
+is in the form
+.Bl -tag -width "exactly NN YY MM" -compact
+.It Em MM/YY/YY Ns Op YY
+Standard (US) date format
+.It Em DD.MM.YY Ns Op YY
+Dotted date format
+.It Ar month day
+.It Ar month day Ns Op Ns No , Ns Ar year 
+.It Ar day Ns No - Ns Ar month Ns Op Ns No - Ns Ar year
+.It Em \+ Ar count Ar offset
+offset
+.Ar count
+ (minutes/hours/days/months/years) from 
+.Ar time .
+In this format, the
+.Ar time
+may also be the special value
+.Em now
+.Po
+for 
+.Dq now + 45 minutes ,
+etc
+.Pc
+.It Ar count Ar offset Em from Ar day-of-week
+offset 
+.Ar count
+(days/months/years) from
+.Ar day-of-week
+.Po
+or the special day
+.Em now ,
+which means today
+.Pc
+.It Em today
+This 
+.Ar time
+today.
+.It Em tomorrow
+This
+.Ar time
+tomorrow.
+.It Em yesterday
+This
+.Ar time
+yesterday
+.Po only useful with the 
+.Em
+next
+date format
+.Pc
+.It Em tonight
+If the hour is > 18 or the hour < 6, it's that hour in the
+night.
+For example, 
+.Dq 3am tonight
+means 3am tomorrow morning.
+.It Em next Ar unit
+The next day/week/year.
+.El
+.El
+.El
+.Sh FILES
+.Bl -tag -width @ATDIR@ -compact
+.It Pa @ATDIR@
+Where at jobs are spooled.
+.El
+.Sh EXAMPLES
+.Bl -tag -width "45 weeks from tomorrow" -compact
+.It Em next week
+This time 7 days from now.
+.It Em teatime tomorrow
+4pm tomorrow.
+.It Em exactly 5 weeks from now
+.It Em three weeks from yesterday
+.It Em teatime 12-feb-2008
+.It Em noon + 3 days
+.El
+.Sh ERRORS
+.Bl -tag -width "syntax error (...)"
+.It "syntax error"
+.Nm
+couldn't parse the requested job time.
+.It "syntax error (pluralization)"
+Mismatch in units
+.Po 
+.Em 1 days ,
+.Em 3 week ,
+etc.
+.Pc
+.It "incorrect time of day"
+The hour of the day was > 12
+.Pq am/pm
+or > 24.
+.It "cannot travel back in time"
+The specified time has already passed.
+.El
+.Sh SEE ALSO
+.Xr atq 1 ,
+.Xr atrm 1 .
+.Sh AUTHOR
+.An David Parsons
+.Pq Li orc@pell.chi.il.us
+.Sh BUGS
+The time specification language may be a little byzantine.
