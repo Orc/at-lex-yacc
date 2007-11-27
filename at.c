@@ -85,9 +85,9 @@ savejob(time_t when)
 {
     int c, i, fd;
     char *v, *r;
-    char job[1+16+4+1];	/* 1 (id) + 16 (date) + 4 (extension) + 1 (0) */
+    char job[1+5+16+1];	/* 1 (id) + 8 (date) + 5 (extension) + 1 (0) */
     unsigned short seq = 0;
-    FILE *output = 0 /* meaningless, but it shuts gcc the fuck up */;
+    FILE *output = 0 /* meaningless, but it makes gcc shut the fuck up */;
     char *pwd;
     struct passwd *user = getpwuid(getuid());
     int size;
@@ -119,6 +119,11 @@ savejob(time_t when)
 	unlink(job);
 	abend("spool: %s", strerror(errno));
     }
+
+    /* become the user before writing to the spoolfile.
+     */
+    setegid(getgid());
+    seteuid(getuid());
 
     fprintf(output, "#! /bin/sh\n");
     
