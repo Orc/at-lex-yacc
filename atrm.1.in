@@ -1,0 +1,22 @@
+.\"     %A%
+.\"
+.Dd November 27, 2007
+.Dt ATRM 1
+.Os MASTODON
+.Sh NAME
+.Nm atrm
+.Nd remove jobs from the at queue
+.Sh SYNOPSIS
+.Nm
+.Ar job
+.Op Ar job
+.Sh DESCRIPTION
+.Nm
+removes jobs from the at queue.
+.Sh FILES
+.Bl -tag -width @ATDIR@ -compact
+.It Pa @ATDIR@
+Where at jobs are spooled.
+.Sh SEE ALSO
+.Xr atq 1 ,
+.Xr at 1 .
