@@ -100,11 +100,14 @@ maketime(int argc, char **argv, void (*abend)(char*,...))
 
     switch (at.special) {
     case TODAY:	break;
+    case LAST:
     case DAYNAME:
 		if ( t->tm_wday < at.value )
 		    t->tm_mday += (at.value - t->tm_wday);
 		else
 		    t->tm_mday += 7 + (at.value - t->tm_wday);
+		if ( at.special == LAST )
+		    t->tm_mday -= 7;
 		break;
     case YESTERDAY:
 		t->tm_mday--;
