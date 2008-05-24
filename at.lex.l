@@ -48,6 +48,7 @@ TODAY		{ SAY return TODAY; }
 TONIGHT		{ SAY return TONIGHT; }
 TOMORROW	{ SAY return TOMORROW; }
 YESTERDAY	{ SAY return YESTERDAY; }
+LAST		{ SAY return LAST; }
 MINUTES?	{ SAY yylval = yy_plural(yytext); return MINUTE; }
 HOURS?		{ SAY yylval = yy_plural(yytext); return HOUR; }
 DAYS?		{ SAY yylval = yy_plural(yytext); return DAY; }
