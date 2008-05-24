@@ -24,10 +24,10 @@ Print the # of jobs in the queue.
 Print the jobs for the named user
 .Pq this option is only available to the superuser .
 .El
-.Pp
-The
+.Sh RETURN VALUES
 .Nm
-utility exits 0 on success, and >0 if an error occurs.
+utility exits 0 on success, and 1 if a fatal error occurred,
+and 2 if it was unable to remove all of the listed jobids.
 .Sh FILES
 .Bl -tag -width @ATDIR@
 .It Pa @ATDIR@

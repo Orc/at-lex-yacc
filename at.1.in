@@ -185,7 +185,8 @@ The specified time has already passed.
 .El
 .Sh SEE ALSO
 .Xr atq 1 ,
-.Xr atrm 1 .
+.Xr atrm 1 ,
+.Xr maketime 3 .
 .Sh AUTHOR
 .An David Parsons
 .Pq Li orc@pell.chi.il.us
