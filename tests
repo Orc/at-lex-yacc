@@ -9,12 +9,9 @@ y:next month
 y:4am next week
 y:11:30 
 y:+4 days
-y:teatime 12-Feb-2008
-y:teatime 12 feb 2008
-y:noon 7/31/2009
 y:4pm + 3 days
 y:teatime july 31
-y:teatime july 31 2011
+?:teatime july 31 2011
 y:exactly 5 weeks from now
 
 y:next week
@@ -39,7 +36,6 @@ n:exactly 30 seconds from now
 n:13:20am
 n:27:00
 n:teatime july 91
-n:noon 18/31/2009
 n:+4 day
 n:teatime 1 days from now
 n:exactly exactly 32 days from now
@@ -47,3 +43,7 @@ n:exactly exactly 32 days from now
 # possibly errors
 
 ?:noon today
+?:teatime 12-Feb-2008
+n:teatime 12 feb 2008
+n:noon 7/31/2009
+n:noon 18/31/2009

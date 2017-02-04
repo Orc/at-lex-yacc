@@ -9,7 +9,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl d Ar flags
-.Op Fl mp
+.Op Fl mpv
 .Op Fl f Pa script
 .Ar time
 .Sh DESCRIPTION
@@ -189,6 +189,6 @@ The specified time has already passed.
 .Xr maketime 3 .
 .Sh AUTHOR
 .An David Parsons
-.Pq Li orc@pell.chi.il.us
+.Pq Li orc@pell.portland.or.us
 .Sh BUGS
 The time specification language may be a little byzantine.

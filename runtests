@@ -19,11 +19,11 @@ while IFS=':' read action line;do
 
 	txt=`echo "$line                                        " | cut -c 1-32`
 
-	echo -n "	$txt "
+	/bin/echo -n "	$txt "
 	case $action in
 	y) test "$rc" -eq 0 && echo "passed" || echo "failed" ;;
 	n) test "$rc" -eq 0 && echo "failed" || echo "passed" ;;
-	*) test "$rc" -eq 0 && echo "rc=0" || echo "$MSG"   ;;
+	*) test "$rc" -eq 0 && echo "ok" || echo "$MSG"   ;;
 	esac
     fi
 done

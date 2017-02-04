@@ -1,4 +1,4 @@
-/* Copyright 2007 by David Loren Parsons (orc@pell.chi.il.us)
+/* Copyright 2007 by David Loren Parsons (orc@pell.portland.or.us)
  * See the COPYRIGHT file included in this distribution for
  * terms of use.
  */
