@@ -1,6 +1,7 @@
 CC=@CC@
 LIBES=@LIBS@ -lat
-CFLAGS=@CFLAGS@ -L.
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@ -L.
 AR=ar
 RANLIB=ranlib
 
@@ -12,7 +13,7 @@ PROGS=at atq atrm
 all: $(PROGS)
 
 clean:
-	rm -f *.o $(PROGS) lex.yy.c y.tab.c y.tab.h
+	rm -f *.o $(PROGS) lex.yy.c y.tab.c y.tab.h libat.a
 
 spotless distclean: clean
 	rm -f @GENERATED_FILES@ @CONFIGURE_FILES@
@@ -21,7 +22,7 @@ test: at tests runtests
 	@sh ./runtests < tests
 
 at: $(OBJS) libat.a
-	$(CC) $(CFLAGS) -o at $(OBJS) $(LIBES)
+	$(CC) $(LDFLAGS) -o at $(OBJS) $(LIBES)
 
 libat.a: $(LOBJS)
 	$(AR) rv libat.a $(LOBJS)

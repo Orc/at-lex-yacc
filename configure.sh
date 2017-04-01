@@ -72,13 +72,7 @@ AC_CHECK_FLOCK || AC_DEFINE NO_FLOCK
 
 AC_CHECK_HEADERS pwd.h grp.h ctype.h
 
-TLOGN "searching for lex/flex runtime library"
-if AC_LIBRARY yywrap -ll -lfl; then
-    TLOG " (found" ${AC_LIBS}")"
-else
-    TLOG " (not found)"
-    AC_FAIL "maketime requires lex/flex"
-fi
+AC_LIBRARY yywrap -ll -lfl || AC_FAIL "maketime requires lex/flex"
 
 [ "$OS_FREEBSD" -o "$OS_DRAGONFLY" ] || AC_CHECK_HEADERS malloc.h
 
