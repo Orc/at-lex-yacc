@@ -158,11 +158,12 @@ yy_prepare(atjobtime *at, int argc, char **argv,void (*abend)(char*,...))
 %token NUMBER DOT COLON AM PM NOON MIDNIGHT TEATIME TODAY TONIGHT 
 %token TOMORROW DAY WEEK MONTH YEAR FROM NOW NEXT MINUTE HOUR DASH
 %token SLASH PLUS MONTHNAME EXACTLY SOONEST DAYNAME COMMA YESTERDAY
-%token LAST ERROR
+%token LAST IN ERROR
 
 %%
 
 when:	NOW PLUS offset
+    |   IN offset
     |	time
     |	time date
     |	date

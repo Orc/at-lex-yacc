@@ -75,7 +75,10 @@ abend(char *fmt, ...)
 static void
 usage()
 {
-    fprintf(stderr, "usage: %s [-m] [-f file] when << job\n", pgm);
+    if ( strcmp(pgm, "in") == 0 )
+	fprintf(stderr, "usage: %s when << job\n", pgm);
+    else
+	fprintf(stderr, "usage: %s [-m] [-f file] when << job\n", pgm);
     exit(1);
 }
 
@@ -209,31 +212,39 @@ char **argv;
     pgm = basename(argv[0]);
     opterr = 1;
     
-    while ( (opt = getopt(argc,argv, "d:f:mv")) != EOF )
-	switch (opt) {
-	case 'd':
-		debug = atoi(optarg);
-		break;
-	case 'v':
-		verbose = 1;
-		break;
-	case 'm':
-		notify = 1;
-		break;
-	case 'f':
-		if ( redirect )
-		    abend("too many -f options");
-		if ( freopen(optarg, "r", stdin) == 0 )
-		    abend("%s", strerror(errno));
-	default:
+    if ( strcmp(pgm, "in") == 0 ) {
+	argv[0] = "in";
+
+	if ( argc < 2 )
 	    usage();
-	}
+    }
+    else {
+	while ( (opt = getopt(argc,argv, "d:f:mv")) != EOF )
+	    switch (opt) {
+	    case 'd':
+		    debug = atoi(optarg);
+		    break;
+	    case 'v':
+		    verbose = 1;
+		    break;
+	    case 'm':
+		    notify = 1;
+		    break;
+	    case 'f':
+		    if ( redirect )
+			abend("too many -f options");
+		    if ( freopen(optarg, "r", stdin) == 0 )
+			abend("%s", strerror(errno));
+	    default:
+		usage();
+	    }
 
-    argc -= optind;
-    argv += optind;
+	argc -= optind;
+	argv += optind;
 
-    if ( argc < 1 )
-	usage();
+	if ( argc < 1 )
+	    usage();
+    }
        
     openlog("at", LOG_PID, LOG_CRON);
     jobtime = maketime(argc, argv, abend);
