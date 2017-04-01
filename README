@@ -1,0 +1,11 @@
+A version of at(1) that uses a lex & yacc time parser instead of
+the hand-built parser than I wrote for Linux/FreeBSD/osx at(1) in
+the 1990s.
+
+The parser handles the regular time specifications that my old one
+does with the addition of the "in" keyword ("in 15 minutes")
+
+
+To build:     ./configure.sh && make
+To clean up:  make spotless
+
