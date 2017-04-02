@@ -164,6 +164,7 @@ yy_prepare(atjobtime *at, int argc, char **argv,void (*abend)(char*,...))
 
 when:	NOW PLUS offset
     |   IN offset
+    |   NOW
     |	time
     |	time date
     |	dateoffset
