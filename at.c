@@ -111,7 +111,7 @@ savejob(time_t when)
 	abend("%s", strerror(errno));
 
     while (1) {
-	snprintf(job, sizeof job, "c%05lx%08lx", seq, when/60);
+	snprintf(job, sizeof job, "c%05lx%08lx", (long)seq, when/60);
 
 	if ( (fd = open(job, O_CREAT|O_EXCL|O_WRONLY, 0600)) != -1 )
 	    break;
