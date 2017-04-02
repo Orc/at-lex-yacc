@@ -1,5 +1,5 @@
 %{
-/* Copyright 2007 by David Loren Parsons (orc@pell.portland.or.us)
+/* Copyright 2007-2017 by David Loren Parsons (orc@pell.portland.or.us)
  * See the COPYRIGHT file included in this distribution for
  * terms of use.
  */
@@ -166,6 +166,7 @@ when:	NOW PLUS offset
     |   IN offset
     |	time
     |	time date
+    |	dateoffset
     |	date
     ;
 
@@ -175,6 +176,11 @@ date:	PLUS offset
     |	datespec
     |	specialdate
     ;
+
+
+dateoffset:	EXACTLY offset FROM fromdate
+	|	offset FROM fromdate
+	;
 
 fromnow:	EXACTLY offset FROM fromtime
 	|	offset FROM fromtime
@@ -212,9 +218,16 @@ dayname:	DAYNAME
 		{ yy_at->special = DAYNAME; yy_at->value = $1; }
 	;
 
-fromtime:	specialdate
+fromdate:	specialdate
 		{ if (yy_at->special == TONIGHT) yy_at->special = TODAY; }
 	|	time
+	|	NOW
+	|	YESTERDAY
+		{ yy_at->special = YESTERDAY; }
+	;
+
+fromtime:	specialdate
+		{ if (yy_at->special == TONIGHT) yy_at->special = TODAY; }
 	|	NOW
 	|	YESTERDAY
 		{ yy_at->special = YESTERDAY; }

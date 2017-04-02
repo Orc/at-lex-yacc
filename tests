@@ -14,6 +14,11 @@ y:4pm + 3 days
 y:teatime july 31
 ?:teatime july 31 2011
 y:exactly 5 weeks from now
+y:5 weeks from teatime
+y:3 days from midnight
+
+y:teatime 3 weeks from now
+y:3 weeks from teatime
 
 y:next week
 y:next monday
@@ -31,6 +36,10 @@ y:one month from friday
 y:three weeks from yesterday
 y:three weeks from last tuesday
 
+# possibly errors
+
+?:noon today
+
 # errors
 
 n:exactly 30 seconds from now
@@ -39,12 +48,9 @@ n:27:00
 n:teatime july 91
 n:+4 day
 n:teatime 1 days from now
+n:teatime 3 days from teatime
 n:exactly exactly 32 days from now
-
-# possibly errors
-
-?:noon today
-?:teatime 12-Feb-2008
+n:teatime 12-Feb-2008
 n:teatime 12 feb 2008
 n:noon 7/31/2009
 n:noon 18/31/2009
