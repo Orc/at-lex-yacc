@@ -25,7 +25,7 @@ yyerror(const char *why)
 {
     if ( yy_abend )
 	(*yy_abend)("%s", why);
-    fprintf(stderr, why);
+    fputs(why, stderr);
 }
 
 static void
