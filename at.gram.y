@@ -214,6 +214,7 @@ dayname:	DAYNAME
 
 fromtime:	specialdate
 		{ if (yy_at->special == TONIGHT) yy_at->special = TODAY; }
+	|	time
 	|	NOW
 	|	YESTERDAY
 		{ yy_at->special = YESTERDAY; }
