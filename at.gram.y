@@ -158,7 +158,7 @@ yy_prepare(atjobtime *at, int argc, char **argv,void (*abend)(char*,...))
 %token NUMBER DOT COLON AM PM NOON MIDNIGHT TEATIME TODAY TONIGHT 
 %token TOMORROW DAY WEEK MONTH YEAR FROM NOW NEXT MINUTE HOUR DASH
 %token SLASH PLUS MONTHNAME EXACTLY SOONEST DAYNAME COMMA YESTERDAY
-%token LAST IN ERROR
+%token LAST IN ON ERROR
 
 %%
 
@@ -167,6 +167,9 @@ when:	NOW PLUS offset
     |   NOW
     |	time
     |	time date
+    |	time COMMA date
+    |	time COMMA dateoffset
+    |	time ON ondate
     |	dateoffset
     |	date
     ;
@@ -177,6 +180,10 @@ date:	PLUS offset
     |	datespec
     |	specialdate
     ;
+
+ondate:		datespec
+	|	dayname
+	;
 
 
 dateoffset:	EXACTLY offset FROM fromdate

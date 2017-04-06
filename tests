@@ -13,10 +13,12 @@ y:11:30
 y:+4 days
 y:4pm + 3 days
 y:teatime july 31
-?:teatime july 31 2011
+y:teatime, july 31
+y:teatime on july 31
 y:exactly 5 weeks from now
 y:5 weeks from teatime
 y:3 days from midnight
+y:teatime, 2 months from now
 
 y:teatime 3 weeks from now
 y:3 weeks from teatime
@@ -47,6 +49,7 @@ n:exactly 30 seconds from now
 n:13:20am
 n:27:00
 n:teatime july 91
+n:teatime july 31 2011
 n:+4 day
 n:teatime 1 days from now
 n:teatime 3 days from teatime
@@ -55,3 +58,5 @@ n:teatime 12-Feb-2008
 n:teatime 12 feb 2008
 n:noon 7/31/2009
 n:noon 18/31/2009
+n:teatime on tomorrow
+n:teatime on 3 weeks from now

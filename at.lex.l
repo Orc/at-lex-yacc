@@ -32,6 +32,7 @@ extern int yy_plural(char *s);
 AM		{ SAY return AM; }
 PM		{ SAY return PM; }
 IN		{ SAY return IN; }
+ON		{ SAY return ON; }
 ONE		{ SAY yylval = 1; return NUMBER; }
 TWO		{ SAY yylval = 2; return NUMBER; }
 THREE		{ SAY yylval = 3; return NUMBER; }
