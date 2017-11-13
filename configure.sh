@@ -54,10 +54,10 @@ case "$WITH_SPOOLDIR" in
 	AC_DEFINE ATDIR \"/var/spool/cron/atjobs/\"
 	AC_SUB ATDIR /var/spool/cron/atjobs/
     fi ;;
-/*) AC_DEFINE ATDIR \"${WITH_QUEUEDIR}/\"
-    AC_SUB ATDIR ${WITH_QUEUEDIR}/
+/*) AC_DEFINE ATDIR \"${WITH_SPOOLDIR}/\"
+    AC_SUB ATDIR ${WITH_SPOOLDIR}/
     ;;
-*)  AC_FAIL "The at spool directory [$WITH_QUEUEDIR] must be a full pathname."
+*)  AC_FAIL "The at spool directory [$WITH_SPOOLDIR] must be a full pathname."
     ;;
 esac
 
