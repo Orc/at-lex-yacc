@@ -1,5 +1,5 @@
 .\"
-.Dd November 27, 2007
+.Dd August 12, 2025
 .Dt ATQ 1
 .Os MASTODON
 .Sh NAME
@@ -37,5 +37,5 @@ Directory containing job files
 .Xr at 1 ,
 .Xr atrm 1 .
 .Sh AUTHOR
-.An David Parsons
+.An Jessica Parsons
 .Pq Li orc@pell.portland.or.us

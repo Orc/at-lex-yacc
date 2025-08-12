@@ -1,6 +1,6 @@
 .\"     %A%
 .\"
-.Dd November 27, 2007
+.Dd August 12, 2025
 .Dt AT 1
 .Os MASTODON
 .Sh NAME
@@ -188,7 +188,7 @@ The specified time has already passed.
 .Xr atrm 1 ,
 .Xr maketime 3 .
 .Sh AUTHOR
-.An David Parsons
+.An Jessica Parsons
 .Pq Li orc@pell.portland.or.us
 .Sh BUGS
 The time specification language may be a little byzantine.

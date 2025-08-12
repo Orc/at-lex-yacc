@@ -1,5 +1,5 @@
 %{
-/* Copyright 2007 by David Loren Parsons (orc@pell.portland.or.us)
+/* Copyright 2025 by Jessica Loren Parsons (orc@pell.portland.or.us)
  * See the COPYRIGHT file included in this distribution for
  * terms of use.
  */
